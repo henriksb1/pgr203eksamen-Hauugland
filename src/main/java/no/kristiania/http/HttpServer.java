@@ -1,6 +1,7 @@
 package no.kristiania.http;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -27,8 +28,8 @@ public class HttpServer {
         new HttpServer(8080);
     }
 
-    private static void handleRequest(Socket socket) throws IOException {
-        String requestLine = HttpClient.readLine(socket);
+    private void handleRequest(Socket clientSocket) throws IOException {
+        String requestLine = HttpClient.readLine(clientSocket);
         System.out.println(requestLine);
 
         String requestTarget = requestLine.split(" ")[1];
@@ -40,13 +41,25 @@ public class HttpServer {
             QueryString queryString = new QueryString(requestTarget.substring(questionPos + 1));
             responseCode = queryString.getParameter("status");
             body = queryString.getParameter("body");
+        }else if(!requestTarget.equals("/echo")) {
+            File targetFile = new File(documentRoot, requestTarget);
+            String response = "HTTP/1.1 200 OK\r\n" +
+                    "Content-Length: "+ targetFile.length() + "\r\n" +
+                    "Content-Type: text/plain\r\n" +
+                    "\r\n";
+
+            clientSocket.getOutputStream().write(response.getBytes());
+            try (FileInputStream inputStream = new FileInputStream(targetFile)){
+                inputStream.transferTo(clientSocket.getOutputStream());
+            }
+
         }
 
         if(body == null) body = "Hello World";
         if(responseCode == null) responseCode = "200";
 
 
-        writeResponse(socket, responseCode, body);
+        writeResponse(clientSocket, responseCode, body);
     }
 
     private static void writeResponse(Socket clientSocket, String responseCode, String body) throws IOException {
