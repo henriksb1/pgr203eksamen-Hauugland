@@ -47,6 +47,15 @@ class HttpServerTest {
         HttpServer server = new HttpServer(10006);
         server.setDocumentRoot(new File("target"));
         HttpClient client = new HttpClient("localhost", 10006, "/missingFile");
-        assertEquals(404, client.getResponseBody());
+        assertEquals(404, client.getResponseCode());
+    }
+    @Test
+    void ShouldReturnCorrectContentType() throws IOException {
+        HttpServer server = new HttpServer(10007);
+        File documentRoot = new File("target");
+        server.setDocumentRoot(documentRoot);
+        Files.writeString(new File(documentRoot, "plain.txt").toPath(), "Plain text");
+        HttpClient client = new HttpClient("localhost", 10007, "/plain.txt");
+        assertEquals("text/plain", client.getResponseHeader("Content-Type"));
     }
 }

@@ -13,11 +13,13 @@ public class HttpServer {
         ServerSocket serverSocket = new ServerSocket(port);
 
         new Thread(() ->{
-            try {
-                Socket socket = serverSocket.accept();
-                handleRequest(socket);
-            } catch (IOException e) {
-                e.printStackTrace();
+            while(true) {
+                try {
+                    Socket socket = serverSocket.accept();
+                    handleRequest(socket);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
 
@@ -25,7 +27,8 @@ public class HttpServer {
     }
 
     public static void main(String[] args) throws IOException {
-        new HttpServer(8080);
+        HttpServer server = new HttpServer(8080);
+        server.setDocumentRoot(new File("src/main/resources"));
     }
 
     private void handleRequest(Socket clientSocket) throws IOException {
@@ -43,12 +46,18 @@ public class HttpServer {
             body = queryString.getParameter("body");
         }else if(!requestTarget.equals("/echo")) {
             File targetFile = new File(documentRoot, requestTarget);
-            String response = "HTTP/1.1 200 OK\r\n" +
+
+            if(!targetFile.exists()){
+                writeResponse(clientSocket, "404", requestTarget + " not found");
+                return;
+            }
+
+            String responseHeaders = "HTTP/1.1 200 OK\r\n" +
                     "Content-Length: "+ targetFile.length() + "\r\n" +
-                    "Content-Type: text/plain\r\n" +
+                    "Content-Type: text/html\r\n" +
                     "\r\n";
 
-            clientSocket.getOutputStream().write(response.getBytes());
+            clientSocket.getOutputStream().write(responseHeaders.getBytes());
             try (FileInputStream inputStream = new FileInputStream(targetFile)){
                 inputStream.transferTo(clientSocket.getOutputStream());
             }
