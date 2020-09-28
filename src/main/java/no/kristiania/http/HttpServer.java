@@ -1,10 +1,13 @@
 package no.kristiania.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class HttpServer {
+    private File documentRoot;
+
     public HttpServer(int port) throws IOException {
         ServerSocket serverSocket = new ServerSocket(port);
 
@@ -25,25 +28,38 @@ public class HttpServer {
     }
 
     private static void handleRequest(Socket socket) throws IOException {
-        String responseCode = "200";
-
         String requestLine = HttpClient.readLine(socket);
         System.out.println(requestLine);
+
         String requestTarget = requestLine.split(" ")[1];
+        String responseCode = null;
+        String body = null;
+
         int questionPos = requestTarget.indexOf('?');
         if (questionPos != -1){
-            String queryString = requestTarget.substring(questionPos+1);
-            int equalsPos = queryString.indexOf('=');
-            String parameterValue = queryString.substring(equalsPos+1);
-            responseCode = parameterValue;
+            QueryString queryString = new QueryString(requestTarget.substring(questionPos + 1));
+            responseCode = queryString.getParameter("status");
+            body = queryString.getParameter("body");
         }
 
-        String response = "HTTP/1.1 " + responseCode + " OK\r\n" +
-                "Content-Type: text/html; charset=utf-8\r\n" +
-                "Content-Length: 11\r\n" +
-                "\r\n" +
-                "Hello World";
+        if(body == null) body = "Hello World";
+        if(responseCode == null) responseCode = "200";
 
-        socket.getOutputStream().write(response.getBytes());
+
+        writeResponse(socket, responseCode, body);
+    }
+
+    private static void writeResponse(Socket clientSocket, String responseCode, String body) throws IOException {
+        String response = "HTTP/1.1 " + responseCode + " OK\r\n" +
+                "Content-Length: "+ body.length() + "\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "\r\n" +
+                body;
+
+        clientSocket.getOutputStream().write(response.getBytes());
+    }
+
+    public void setDocumentRoot(File documentRoot) {
+        this.documentRoot = documentRoot;
     }
 }
