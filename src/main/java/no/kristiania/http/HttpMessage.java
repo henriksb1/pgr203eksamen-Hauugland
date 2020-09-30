@@ -76,4 +76,15 @@ public class HttpMessage {
         message.readHeaders(socket);
         return message;
     }
+
+    public String readBody(Socket socket) throws IOException {
+        int contentLength = Integer.parseInt(getHeader("Content-Length"));
+        StringBuilder body = new StringBuilder();
+        for (int i = 0; i < contentLength; i++) {
+            body.append((char) socket.getInputStream().read());
+        }
+        return body.toString();
+    }
 }
+
+

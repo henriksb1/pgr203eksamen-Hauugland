@@ -38,7 +38,26 @@ public class HttpServer {
         String requestLine = HttpMessage.readLine(clientSocket);
         System.out.println(requestLine);
 
+        String requestMethod = requestLine.split(" ")[0];
         String requestTarget = requestLine.split(" ")[1];
+
+        if(requestMethod.equals("POST")){
+            HttpMessage requestMessage = new HttpMessage(requestLine);
+            requestMessage.readHeaders(clientSocket);
+
+            int contentLength = Integer.parseInt(requestMessage.getHeader("Content-Length"));
+            StringBuilder body = new StringBuilder();
+            for (int i = 0; i < contentLength; i++) {
+                body.append((char)clientSocket.getInputStream().read());
+            }
+            QueryString requestForm = new QueryString(body.toString());
+            memberNames.add(requestForm.getParameter("full_name"));
+
+            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+            responseMessage.write(clientSocket);
+            return;
+        }
+
         String responseCode = null;
         String body = null;
 

@@ -63,10 +63,10 @@ class HttpServerTest {
     @Test
     void ShouldPostMember() throws IOException {
         HttpServer server = new HttpServer(10008);
-       QueryString member = new QueryString("");
-       member.addParameter("memberName", "Marius");
-       member.addParameter("email", "austheim.marius@gmail.com");
-       new HttpClient("localhost", 10008, "/members", "POST", member);
-       assertEquals(List.of("Marius"), server.getMemberNames());
+        QueryString member = new QueryString("");
+        member.addParameter("full_name", "Marius");
+        member.addParameter("email_address", "austheim.marius@gmail.com");
+        new HttpClient("localhost", 10008, "/members", "POST", member);
+        assertEquals(List.of("Marius"), server.getMemberNames());
     }
 }

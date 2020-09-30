@@ -18,7 +18,7 @@ public class HttpClient {
 
         responseMessage = HttpMessage.read(socket);
 
-        responseBody = HttpMessage.readBody(socket, getResponseHeader("Content-Length"));
+        responseBody = responseMessage.readBody(socket);
     }
 
     public HttpClient(String hostName, int port, String requestTarget, String method, QueryString form) throws IOException {
@@ -26,9 +26,9 @@ public class HttpClient {
 
         String requestBody = form.getQueryString();
 
-        HttpMessage requestMessage = new HttpMessage(method + " " + requestTarget + "HTTP/1.1");
+        HttpMessage requestMessage = new HttpMessage(method + " " + requestTarget + " HTTP/1.1");
         requestMessage.setHeader("Host", hostName);
-        requestMessage.setHeader("Content-length", String.valueOf(requestBody.length()));
+        requestMessage.setHeader("Content-Length", String.valueOf(requestBody.length()));
         requestMessage.write(socket);
         socket.getOutputStream().write(requestBody.getBytes());
 
