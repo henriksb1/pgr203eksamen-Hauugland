@@ -14,10 +14,9 @@ public class HttpClient {
     public HttpClient(String hostname, int port, String requestTarget) throws IOException {
         Socket socket = new Socket(hostname, port);
 
-        String request = "GET "+ requestTarget + " HTTP/1.1\r\n" +
-                "Host: " + hostname + "\r\n\r\n";
-
-        socket.getOutputStream().write(request.getBytes());
+        HttpMessage requestMessage = new HttpMessage("GET " + requestTarget + " HTTP/1.1");
+        requestMessage.setHeader("Host", hostname);
+        requestMessage.write(socket);
 
         String line = readLine(socket);
 

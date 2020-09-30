@@ -52,16 +52,17 @@ public class HttpServer {
                 return;
             }
 
-            String contentType = "text/html";
-            if (targetFile.getName().endsWith(".txt")){
-                contentType = "text/plain";
-            }
-            String responseHeaders = "HTTP/1.1 200 OK\r\n" +
-                    "Content-Length: "+ targetFile.length() + "\r\n" +
-                    "Content-Type: " + contentType + "\r\n" +
-                    "\r\n";
+            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+            responseMessage.setHeader("Content-Length", String.valueOf(targetFile.length()));
+            responseMessage.setHeader("Content-Type", "text/html");
 
-            clientSocket.getOutputStream().write(responseHeaders.getBytes());
+
+            if (targetFile.getName().endsWith(".txt")){
+                responseMessage.setHeader("Content-Type", "text/plain");
+            }
+
+            responseMessage.write(clientSocket);
+
             try (FileInputStream inputStream = new FileInputStream(targetFile)){
                 inputStream.transferTo(clientSocket.getOutputStream());
             }
@@ -76,13 +77,12 @@ public class HttpServer {
     }
 
     private static void writeResponse(Socket clientSocket, String responseCode, String body) throws IOException {
-        String response = "HTTP/1.1 " + responseCode + " OK\r\n" +
-                "Content-Length: "+ body.length() + "\r\n" +
-                "Content-Type: text/plain\r\n" +
-                "\r\n" +
-                body;
+        HttpMessage responseMessage = new HttpMessage("HTTP/1.1 " + responseCode + " OK");
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+        responseMessage.setHeader("Content-Type", "text/plain");
+        responseMessage.write(clientSocket);
+        clientSocket.getOutputStream().write(body.getBytes());
 
-        clientSocket.getOutputStream().write(response.getBytes());
     }
 
     public void setDocumentRoot(File documentRoot) {
