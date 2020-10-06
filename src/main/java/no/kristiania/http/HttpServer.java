@@ -83,6 +83,10 @@ public class HttpServer {
                 responseMessage.setHeader("Content-Type", "text/plain");
             }
 
+            if(targetFile.getName().endsWith(".css")){
+                responseMessage.setHeader("Content-Type", "text/css");
+            }
+
             responseMessage.write(clientSocket);
 
             try (FileInputStream inputStream = new FileInputStream(targetFile)){
