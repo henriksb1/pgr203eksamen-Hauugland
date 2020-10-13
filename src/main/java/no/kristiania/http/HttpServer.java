@@ -60,6 +60,15 @@ public class HttpServer {
             responseMessage.write(clientSocket);
             clientSocket.getOutputStream().write("OK".getBytes());
             return;
+        } else if(requestMethod.equals("GET")){
+            if(requestTarget.equals("/")){
+                HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
+                responseMessage.setHeader("Location", "http://localhost:8080/index.html");
+                responseMessage.setHeader("Connection", "close");
+                responseMessage.setHeader("Content-Length", "2");
+                responseMessage.write(clientSocket);
+                clientSocket.getOutputStream().write("OK".getBytes());
+            }
         }
 
         String responseCode = null;
