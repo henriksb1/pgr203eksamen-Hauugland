@@ -20,7 +20,7 @@ public class HttpServer {
                 try {
                     Socket socket = serverSocket.accept();
                     handleRequest(socket);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -53,8 +53,12 @@ public class HttpServer {
             QueryString requestForm = new QueryString(body.toString());
             memberNames.add(requestForm.getParameter("full_name"));
 
-            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
+            responseMessage.setHeader("Location", "http://localhost:8080/index.html");
+            responseMessage.setHeader("Connection", "close");
+            responseMessage.setHeader("Content-Length", "2");
             responseMessage.write(clientSocket);
+            clientSocket.getOutputStream().write("OK".getBytes());
             return;
         }
 
@@ -69,6 +73,7 @@ public class HttpServer {
                 body += "<li>" + memberName + "</li>";
             }
             body += "</ul>";
+
         } else if (questionPos != -1){
             QueryString queryString = new QueryString(requestTarget.substring(questionPos + 1));
             responseCode = queryString.getParameter("status");
@@ -84,7 +89,7 @@ public class HttpServer {
             HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
             responseMessage.setHeader("Content-Length", String.valueOf(targetFile.length()));
             responseMessage.setHeader("Content-Type", "text/html");
-
+            responseMessage.setHeader("Connection", "close");
 
             if (targetFile.getName().endsWith(".txt")){
                 responseMessage.setHeader("Content-Type", "text/plain");
@@ -113,6 +118,7 @@ public class HttpServer {
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 " + responseCode + " OK");
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.setHeader("Content-Type", "text/plain");
+        responseMessage.setHeader("Connection", "close");
         responseMessage.write(clientSocket);
         clientSocket.getOutputStream().write(body.getBytes());
 
