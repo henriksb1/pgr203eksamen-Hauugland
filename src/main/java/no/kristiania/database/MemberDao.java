@@ -20,7 +20,6 @@ public class MemberDao {
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
                         System.out.println(rs.getString("product_name"));
-                        System.out.println('test a merge');
                     }
                 }
             }
