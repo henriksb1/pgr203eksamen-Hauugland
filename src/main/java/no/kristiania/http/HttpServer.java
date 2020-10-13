@@ -62,7 +62,14 @@ public class HttpServer {
         String body = null;
 
         int questionPos = requestTarget.indexOf('?');
-        if (questionPos != -1){
+
+        if(requestTarget.equals("/projectMembers")){
+            body = "<ul>";
+            for(String memberName : getMemberNames()){
+                body += "<li>" + memberName + "</li>";
+            }
+            body += "</ul>";
+        } else if (questionPos != -1){
             QueryString queryString = new QueryString(requestTarget.substring(questionPos + 1));
             responseCode = queryString.getParameter("status");
             body = queryString.getParameter("body");
