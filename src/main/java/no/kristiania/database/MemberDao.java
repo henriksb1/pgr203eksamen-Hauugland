@@ -19,7 +19,7 @@ public class MemberDao {
             try (PreparedStatement statement = connection.prepareStatement("select * from members")) {
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
-                        System.out.println(rs.getString("product_name"));
+                        System.out.println(rs.getString("member_name"));
                     }
                 }
             }
