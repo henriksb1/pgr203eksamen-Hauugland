@@ -2,6 +2,7 @@ package no.kristiania.database;
 
 import org.postgresql.ds.PGSimpleDataSource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,13 +13,18 @@ import java.util.Scanner;
 
 public class MemberDao {
 
+    private DataSource datasource;
     private ArrayList<String> members = new ArrayList<>();
+
+    public MemberDao(DataSource dataSource) {
+        this.datasource = dataSource;
+    }
 
     public static void main(String[] args) throws SQLException {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl("jdbc:postgresql://localhost:5432/teammembers");
         dataSource.setUser("memberadmin");
-        dataSource.setPassword("YZLMk7T94;Z\\C#z&");
+        dataSource.setPassword("V0E5!M@7eaM!");
 
 
         System.out.println("Whats the new member name?");
@@ -43,7 +49,13 @@ public class MemberDao {
         }
     }
 
-    public void insert(String member) {
+    public void insert(String member) throws SQLException {
+        try (Connection connection = datasource.getConnection()){
+            try(PreparedStatement statement = connection.prepareStatement("INSERT INTO members (member_name) values (?)")){
+                statement.setString(1, member);
+                statement.executeUpdate();
+            }
+        }
         members.add(member);
     }
 
