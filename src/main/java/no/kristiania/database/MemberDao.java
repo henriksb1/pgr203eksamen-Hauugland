@@ -24,7 +24,7 @@ public class MemberDao {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl("jdbc:postgresql://localhost:5432/teammembers");
         dataSource.setUser("memberadmin");
-        dataSource.setPassword("V0E5!M@7eaM!");
+        dataSource.setPassword("YZLMk7T94;Z\\C#z&");
 
         MemberDao memberDao = new MemberDao(dataSource);
 
