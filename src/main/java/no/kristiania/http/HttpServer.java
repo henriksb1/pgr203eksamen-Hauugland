@@ -1,18 +1,28 @@
 package no.kristiania.http;
 
+import no.kristiania.database.Member;
+import no.kristiania.database.MemberDao;
+import org.postgresql.ds.PGSimpleDataSource;
+
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HttpServer {
     private File documentRoot;
     private List<String> memberNames = new ArrayList<>();
+    private final MemberDao memberDao;
 
-    public HttpServer(int port) throws IOException {
+    public HttpServer(int port, DataSource dataSource) throws IOException {
+
+        memberDao = new MemberDao(dataSource);
+
         ServerSocket serverSocket = new ServerSocket(port);
 
         new Thread(() ->{
@@ -30,11 +40,16 @@ public class HttpServer {
     }
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = new HttpServer(8080);
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl("jdbc:postgresql://localhost:5432/teammembers");
+        dataSource.setUser("memberadmin");
+        dataSource.setPassword("V0E5!M@7eaM!");
+
+        HttpServer server = new HttpServer(8080, dataSource);
         server.setDocumentRoot(new File("src/main/resources"));
     }
 
-    private void handleRequest(Socket clientSocket) throws IOException {
+    private void handleRequest(Socket clientSocket) throws IOException, SQLException {
         String requestLine = HttpMessage.readLine(clientSocket);
         System.out.println(requestLine);
 
@@ -51,7 +66,9 @@ public class HttpServer {
                 body.append((char)clientSocket.getInputStream().read());
             }
             QueryString requestForm = new QueryString(body.toString());
-            memberNames.add(requestForm.getParameter("full_name"));
+            Member member = new Member();
+            member.setName(requestForm.getParameter("full_name"));
+            memberDao.insert(member);
 
             HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
             responseMessage.setHeader("Location", "http://localhost:8080/index.html");
@@ -78,8 +95,8 @@ public class HttpServer {
 
         if(requestTarget.equals("/projectMembers")){
             body = "<ul>";
-            for(String memberName : getMemberNames()){
-                body += "<li>" + memberName + "</li>";
+            for(Member member : memberDao.list()){
+                body += "<li>" + member.getName() + "</li>";
             }
             body += "</ul>";
 

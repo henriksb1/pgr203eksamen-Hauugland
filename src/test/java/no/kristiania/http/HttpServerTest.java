@@ -1,5 +1,8 @@
 package no.kristiania.http;
 
+import org.flywaydb.core.Flyway;
+import org.h2.jdbcx.JdbcDataSource;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -11,30 +14,40 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HttpServerTest {
+
+    private JdbcDataSource dataSource;
+
+    @BeforeEach
+    void setUp(){
+        JdbcDataSource dataSource = new JdbcDataSource();
+        dataSource.setUrl("jdbc:h2:mem:testdatabase;DB_CLOSE_DELAY=-1");
+        Flyway.configure().dataSource(dataSource).load().migrate();
+    }
+
     @Test
     void shouldReturnSuccessfulErrorCode() throws IOException {
-        HttpServer server = new HttpServer(10001);
+        HttpServer server = new HttpServer(10001, dataSource);
         HttpClient client = new HttpClient("localhost", 10001, "/echo");
         assertEquals(200, client.getResponseCode());
     }
 
     @Test
     void shouldReturnUnsuccessfulErrorCode() throws IOException {
-        HttpServer server = new HttpServer(10002);
+        HttpServer server = new HttpServer(10002, dataSource);
         HttpClient client = new HttpClient("localhost", 10002, "/echo?status=404");
         assertEquals(404, client.getResponseCode());
     }
 
     @Test
     void shouldReturnHttpHeaders() throws IOException {
-        HttpServer server = new HttpServer(10003);
+        HttpServer server = new HttpServer(10003, dataSource);
         HttpClient client = new HttpClient("localhost", 10003, "/echo?body=HelloWorld");
         assertEquals("10", client.getResponseHeader("Content-Length"));
     }
 
     @Test
     void shouldReturnFileContent() throws IOException {
-        HttpServer server = new HttpServer(10005);
+        HttpServer server = new HttpServer(10005, dataSource);
         File documentRoot = new File("target");
         server.setDocumentRoot(documentRoot);
         String fileContent = "Hello " + new Date();
@@ -45,14 +58,14 @@ class HttpServerTest {
 
     @Test
     void ShouldReturn404onMissingFile() throws IOException {
-        HttpServer server = new HttpServer(10006);
+        HttpServer server = new HttpServer(10006, dataSource);
         server.setDocumentRoot(new File("target"));
         HttpClient client = new HttpClient("localhost", 10006, "/missingFile");
         assertEquals(404, client.getResponseCode());
     }
     @Test
     void ShouldReturnCorrectContentType() throws IOException {
-        HttpServer server = new HttpServer(10007);
+        HttpServer server = new HttpServer(10007, dataSource);
         File documentRoot = new File("target");
         server.setDocumentRoot(documentRoot);
         Files.writeString(new File(documentRoot, "plain.txt").toPath(), "Plain text");
@@ -62,7 +75,7 @@ class HttpServerTest {
 
     @Test
     void ShouldPostMember() throws IOException {
-        HttpServer server = new HttpServer(10008);
+        HttpServer server = new HttpServer(10008, dataSource);
         QueryString member = new QueryString("");
         member.addParameter("full_name", "Marius");
         member.addParameter("email_address", "austheim.marius@gmail.com");
@@ -72,7 +85,7 @@ class HttpServerTest {
 
     @Test
     void ShouldDisplayExistingMember() throws IOException {
-        HttpServer server = new HttpServer(10009);
+        HttpServer server = new HttpServer(10009, dataSource);
         server.getMemberNames().add("Petter");
         HttpClient client = new HttpClient("localhost", 10009, "/projectMembers");
         assertEquals("<ul><li>Petter</li></ul>", client.getResponseBody());
