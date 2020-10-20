@@ -24,7 +24,7 @@ public class MemberDao {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl("jdbc:postgresql://localhost:5432/teammembers");
         dataSource.setUser("memberadmin");
-        dataSource.setPassword("V0E5!M@7eaM!");
+        dataSource.setPassword("YZLMk7T94;Z\\C#z&");
 
 
         System.out.println("Whats the new member name?");
@@ -59,7 +59,17 @@ public class MemberDao {
         members.add(member);
     }
 
-    public List<String> list() {
+    public List<String> list() throws SQLException {
+        List<String>  members = new ArrayList<>();
+        try (Connection connection = datasource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members")) {
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        members.add(rs.getString("member_name"));
+                    }
+                }
+            }
+        }
         return members;
     }
 }
