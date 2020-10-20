@@ -3,6 +3,7 @@ package no.kristiania.database;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Member;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +15,6 @@ import java.util.Scanner;
 public class MemberDao {
 
     private DataSource datasource;
-    private ArrayList<String> members = new ArrayList<>();
 
     public MemberDao(DataSource dataSource) {
         this.datasource = dataSource;
@@ -24,29 +24,20 @@ public class MemberDao {
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
         dataSource.setUrl("jdbc:postgresql://localhost:5432/teammembers");
         dataSource.setUser("memberadmin");
-        dataSource.setPassword("YZLMk7T94;Z\\C#z&");
+        dataSource.setPassword("V0E5!M@7eaM!");
+
+        MemberDao memberDao = new MemberDao(dataSource);
 
 
         System.out.println("Whats the new member name?");
         Scanner scanner = new Scanner(System.in);
         String memberName = scanner.nextLine();
 
-        try (Connection connection = dataSource.getConnection()){
-            try(PreparedStatement statement = connection.prepareStatement("INSERT INTO members (member_name) values (?)")){
-                statement.setString(1, memberName);
-                statement.executeUpdate();
-            }
+        memberDao.insert(memberName);
+        for (String member : memberDao.list()) {
+            System.out.println(member);
         }
 
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members")) {
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        System.out.println(rs.getString("member_name"));
-                    }
-                }
-            }
-        }
     }
 
     public void insert(String member) throws SQLException {
@@ -56,7 +47,6 @@ public class MemberDao {
                 statement.executeUpdate();
             }
         }
-        members.add(member);
     }
 
     public List<String> list() throws SQLException {
