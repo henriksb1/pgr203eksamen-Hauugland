@@ -14,6 +14,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class HttpServer {
     private List<String> memberNames = new ArrayList<>();
@@ -41,10 +42,14 @@ public class HttpServer {
     }
 
     public static void main(String[] args) throws IOException {
+        Properties properties = new Properties();
+        try (FileReader fileReader = new FileReader("pgr203.properties")) {
+            properties.load(fileReader);
+        }
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/teammembers");
-        dataSource.setUser("memberadmin");
-        dataSource.setPassword("V0E5!M@7eaM!");
+        dataSource.setUrl(properties.getProperty("datasource.url"));
+        dataSource.setUser(properties.getProperty("datasource.username"));
+        dataSource.setPassword(properties.getProperty("datasource.password"));
 
         HttpServer server = new HttpServer(8080, dataSource);
 
