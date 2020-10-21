@@ -41,10 +41,11 @@ public class MemberDao {
     public void insert(Member member) throws SQLException {
         try (Connection connection = datasource.getConnection()){
             try(PreparedStatement statement = connection.prepareStatement(
-                    "INSERT INTO members (member_name) values (?)",
+                    "INSERT INTO members (member_name, email) values (?, ?)",
                     Statement.RETURN_GENERATED_KEYS
             )){
                 statement.setString(1, member.getName());
+                statement.setString(2, member.getEmail());
                 statement.executeUpdate();
 
                 try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -64,6 +65,7 @@ public class MemberDao {
                         Member member = new Member();
                         member.setId(rs.getLong("id"));
                         member.setName(rs.getString("member_name"));
+                        member.setEmail(rs.getString("email"));
                         return member;
                     }else{
                         return null;
