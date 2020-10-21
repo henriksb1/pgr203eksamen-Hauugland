@@ -50,6 +50,11 @@ public class MemberDao {
         }
     }
 
+    public Member retrieve(Long id) {
+        return null;
+    }
+
+
     public List<Member> list() throws SQLException {
         List<Member>  members = new ArrayList<>();
         try (Connection connection = datasource.getConnection()) {
