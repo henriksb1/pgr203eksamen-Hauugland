@@ -2,11 +2,13 @@ package no.kristiania.http;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryStringTest {
     @Test
-    void shouldRetrieveQueryParameter(){
+    void shouldRetrieveQueryParameter() {
         QueryString queryString = new QueryString("status=200");
         assertEquals("200", queryString.getParameter("status"));
 
@@ -32,7 +34,7 @@ public class QueryStringTest {
         assertEquals("Hello", queryString.getParameter("text"));
     }
     @Test
-    void ShouldSerializeQueryString(){
+    void ShouldSerializeQueryString() {
         QueryString queryString = new QueryString("status=200");
         assertEquals("status=200", queryString.getQueryString());
         queryString.addParameter("body", "Hello");

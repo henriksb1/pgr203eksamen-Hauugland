@@ -1,26 +1,38 @@
 package no.kristiania.http;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import no.kristiania.database.Member;
+import no.kristiania.database.MemberDao;
+import org.flywaydb.core.Flyway;
+import org.postgresql.ds.PGSimpleDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 public class HttpServer {
-    private File documentRoot;
     private List<String> memberNames = new ArrayList<>();
+    private final MemberDao memberDao;
+    private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
 
-    public HttpServer(int port) throws IOException {
+    public HttpServer(int port, DataSource dataSource) throws IOException {
+
+        memberDao = new MemberDao(dataSource);
+
         ServerSocket serverSocket = new ServerSocket(port);
 
         new Thread(() ->{
             while(true) {
-                try {
-                    Socket socket = serverSocket.accept();
-                    handleRequest(socket);
-                } catch (Exception e) {
+                    try (Socket socket = serverSocket.accept()) {
+                        handleRequest(socket);
+                    } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -30,11 +42,24 @@ public class HttpServer {
     }
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = new HttpServer(8080);
-        server.setDocumentRoot(new File("src/main/resources"));
+        Properties properties = new Properties();
+        try (FileReader fileReader = new FileReader("pgr203.properties")) {
+            properties.load(fileReader);
+        }
+        PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl(properties.getProperty("datasource.url"));
+        dataSource.setUser(properties.getProperty("datasource.username"));
+        dataSource.setPassword(properties.getProperty("datasource.password"));
+
+        Flyway.configure().dataSource(dataSource).load().migrate();
+
+        HttpServer server = new HttpServer(8080, dataSource);
+
+        logger.info("Started on port {}", 8080);
+
     }
 
-    private void handleRequest(Socket clientSocket) throws IOException {
+    private void handleRequest(Socket clientSocket) throws IOException, SQLException {
         String requestLine = HttpMessage.readLine(clientSocket);
         System.out.println(requestLine);
 
@@ -50,8 +75,15 @@ public class HttpServer {
             for (int i = 0; i < contentLength; i++) {
                 body.append((char)clientSocket.getInputStream().read());
             }
+
             QueryString requestForm = new QueryString(body.toString());
             memberNames.add(requestForm.getParameter("full_name"));
+
+            Member member = new Member();
+            member.setName(requestForm.getParameter("full_name"));
+            member.setEmail(requestForm.getParameter("email_address"));
+            memberDao.insert(member);
+
 
             HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
             responseMessage.setHeader("Location", "http://localhost:8080/index.html");
@@ -69,6 +101,7 @@ public class HttpServer {
                 responseMessage.write(clientSocket);
                 clientSocket.getOutputStream().write("OK".getBytes());
             }
+
         }
 
         String responseCode = null;
@@ -78,8 +111,8 @@ public class HttpServer {
 
         if(requestTarget.equals("/projectMembers")){
             body = "<ul>";
-            for(String memberName : getMemberNames()){
-                body += "<li>" + memberName + "</li>";
+            for(Member member : memberDao.list()){
+                body += "<li>" + member.getName() + " (Email: " + member.getEmail() + ") </li>";
             }
             body += "</ul>";
 
@@ -88,32 +121,8 @@ public class HttpServer {
             responseCode = queryString.getParameter("status");
             body = queryString.getParameter("body");
         }else if(!requestTarget.equals("/echo")) {
-            File targetFile = new File(documentRoot, requestTarget);
-
-            if(!targetFile.exists()){
-                writeResponse(clientSocket, "404", requestTarget + " not found");
-                return;
-            }
-
-            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
-            responseMessage.setHeader("Content-Length", String.valueOf(targetFile.length()));
-            responseMessage.setHeader("Content-Type", "text/html");
-            responseMessage.setHeader("Connection", "close");
-
-            if (targetFile.getName().endsWith(".txt")){
-                responseMessage.setHeader("Content-Type", "text/plain");
-            }
-
-            if(targetFile.getName().endsWith(".css")){
-                responseMessage.setHeader("Content-Type", "text/css");
-            }
-
-            responseMessage.write(clientSocket);
-
-            try (FileInputStream inputStream = new FileInputStream(targetFile)){
-                inputStream.transferTo(clientSocket.getOutputStream());
-            }
-
+            handleFileRequest(clientSocket, requestTarget);
+            return;
         }
 
         if(body == null) body = "Hello World";
@@ -121,6 +130,40 @@ public class HttpServer {
 
 
         writeResponse(clientSocket, responseCode, body);
+    }
+
+    private void handleFileRequest(Socket clientSocket, String requestTarget) throws IOException {
+        URL requestedResource = getClass().getResource("/public" + requestTarget);
+        String rootPath = getClass().getResource("/public").getPath();
+        if(requestedResource == null || !requestedResource.getPath().startsWith(rootPath)){
+                writeResponse(clientSocket, "404", requestTarget + " not found");
+                return;
+        }
+        try(InputStream inputStream = getClass().getResourceAsStream("/public" + requestTarget)){
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            inputStream.transferTo(buffer);
+
+
+            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+
+            if (requestTarget.endsWith(".txt")){
+                responseMessage.setHeader("Content-Type", "text/plain");
+            }
+
+            if(requestTarget.endsWith(".css")){
+                responseMessage.setHeader("Content-Type", "text/css");
+            }
+
+            if(requestTarget.endsWith(".html")){
+                responseMessage.setHeader("Content-Type", "text/html");
+            }
+
+            responseMessage.setHeader("Content-Length", String.valueOf(buffer.toByteArray().length));
+            responseMessage.setHeader("Connection", "close");
+
+            responseMessage.write(clientSocket);
+            clientSocket.getOutputStream().write(buffer.toByteArray());
+        }
     }
 
     private static void writeResponse(Socket clientSocket, String responseCode, String body) throws IOException {
@@ -131,10 +174,6 @@ public class HttpServer {
         responseMessage.write(clientSocket);
         clientSocket.getOutputStream().write(body.getBytes());
 
-    }
-
-    public void setDocumentRoot(File documentRoot) {
-        this.documentRoot = documentRoot;
     }
 
     public List<String> getMemberNames() {

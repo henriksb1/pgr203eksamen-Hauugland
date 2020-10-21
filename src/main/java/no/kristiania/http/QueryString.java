@@ -1,5 +1,9 @@
 package no.kristiania.http;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,7 +15,7 @@ public class QueryString {
         if (queryString.isEmpty()) return;
         for (String parameter : queryString.split("&")) {
             int equalPos = parameter.indexOf("=");
-            String value = parameter.substring(equalPos+1);
+            String value = URLDecoder.decode(parameter.substring(equalPos+1), StandardCharsets.UTF_8);
             String parameterName = parameter.substring(0, equalPos);
             parameters.put(parameterName, value);
         }
