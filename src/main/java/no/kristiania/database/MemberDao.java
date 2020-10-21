@@ -57,7 +57,8 @@ public class MemberDao {
 
     public Member retrieve(Long id) throws SQLException {
         try (Connection connection = datasource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members")) {
+            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members WHERE id = ?")) {
+                statement.setLong(1, id);
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
                         Member member = new Member();

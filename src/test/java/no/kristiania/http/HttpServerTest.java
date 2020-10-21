@@ -58,7 +58,7 @@ class HttpServerTest {
     }
 
     @Test
-    void ShouldReturn404onMissingFile() throws IOException {
+    void shouldReturn404onMissingFile() throws IOException {
         HttpServer server = new HttpServer(10006, dataSource);
         File documentRoot = new File("target/test-classes");
         HttpClient client = new HttpClient("localhost", 10006, "/missingFile");
@@ -75,7 +75,7 @@ class HttpServerTest {
     }
 
     @Test
-    void ShouldReturnCorrectContentType() throws IOException {
+    void shouldReturnCorrectContentType() throws IOException {
         HttpServer server = new HttpServer(10007, dataSource);
         File documentRoot = new File("target/test-classes/public");
         documentRoot.mkdirs();
@@ -85,7 +85,7 @@ class HttpServerTest {
     }
 
     @Test
-    void ShouldPostMember() throws IOException {
+    void shouldPostMember() throws IOException {
         HttpServer server = new HttpServer(10008, dataSource);
         QueryString member = new QueryString("");
         member.addParameter("full_name", "Marius");
@@ -95,7 +95,7 @@ class HttpServerTest {
     }
 
     @Test
-    void ShouldDisplayExistingMember() throws IOException {
+    void shouldDisplayExistingMember() throws IOException {
         HttpServer server = new HttpServer(10009, dataSource);
         server.getMemberNames().add("Petter");
         HttpClient client = new HttpClient("localhost", 10009, "/projectMembers");

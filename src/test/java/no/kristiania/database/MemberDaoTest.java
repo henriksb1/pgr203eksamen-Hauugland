@@ -24,16 +24,20 @@ class MemberDaoTest {
     }
 
     @Test
-    void ShouldListInsertedMembers() throws SQLException {
-        Member member = exampleMember();
-        memberDao.insert(member);
+    void shouldListInsertedMembers() throws SQLException {
+        Member member1 = exampleMember();
+        Member member2 = exampleMember();
+        memberDao.insert(member1);
+        memberDao.insert(member2);
         assertThat(memberDao.list())
-                .extracting(Member::getName)
-                .contains(member.getName());
+                .extracting(Member :: getName)
+                .contains(member1.getName(), member2.getName());
     }
 
     @Test
     void shouldRetrieveAllMemberProperties() throws SQLException {
+        memberDao.insert(exampleMember());
+        memberDao.insert(exampleMember());
         Member member = exampleMember();
         memberDao.insert(member);
         assertThat(member).hasNoNullFieldsOrProperties();
@@ -45,7 +49,6 @@ class MemberDaoTest {
     private Member exampleMember() {
         Member member = new Member();
         member.setName(exampleMemberName());
-
         return member;
 
     }
