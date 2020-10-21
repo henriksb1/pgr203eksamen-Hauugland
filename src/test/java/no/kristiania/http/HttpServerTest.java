@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HttpServerTest {
@@ -19,7 +20,7 @@ class HttpServerTest {
 
     @BeforeEach
     void setUp(){
-        JdbcDataSource dataSource = new JdbcDataSource();
+        dataSource = new JdbcDataSource();
         dataSource.setUrl("jdbc:h2:mem:testdatabase;DB_CLOSE_DELAY=-1");
         Flyway.configure().dataSource(dataSource).load().migrate();
     }
@@ -48,8 +49,7 @@ class HttpServerTest {
     @Test
     void shouldReturnFileContent() throws IOException {
         HttpServer server = new HttpServer(10005, dataSource);
-        File documentRoot = new File("target");
-        server.setDocumentRoot(documentRoot);
+        File documentRoot = new File("target/test-classes");
         String fileContent = "Hello " + new Date();
         Files.writeString(new File(documentRoot, "index.html").toPath(), fileContent);
         HttpClient client = new HttpClient("localhost", 10005, "/index.html");
@@ -59,15 +59,14 @@ class HttpServerTest {
     @Test
     void ShouldReturn404onMissingFile() throws IOException {
         HttpServer server = new HttpServer(10006, dataSource);
-        server.setDocumentRoot(new File("target"));
+        File documentRoot = new File("target/test-classes");
         HttpClient client = new HttpClient("localhost", 10006, "/missingFile");
         assertEquals(404, client.getResponseCode());
     }
     @Test
     void ShouldReturnCorrectContentType() throws IOException {
         HttpServer server = new HttpServer(10007, dataSource);
-        File documentRoot = new File("target");
-        server.setDocumentRoot(documentRoot);
+        File documentRoot = new File("target/test-classes");
         Files.writeString(new File(documentRoot, "plain.txt").toPath(), "Plain text");
         HttpClient client = new HttpClient("localhost", 10007, "/plain.txt");
         assertEquals("text/plain", client.getResponseHeader("Content-Type"));
@@ -88,6 +87,6 @@ class HttpServerTest {
         HttpServer server = new HttpServer(10009, dataSource);
         server.getMemberNames().add("Petter");
         HttpClient client = new HttpClient("localhost", 10009, "/projectMembers");
-        assertEquals("<ul><li>Petter</li></ul>", client.getResponseBody());
+        assertThat(client.getResponseBody().contains("<ul><li>Petter</li></ul>"));
     }
 }

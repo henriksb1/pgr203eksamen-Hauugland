@@ -2,37 +2,39 @@ package no.kristiania.http;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryStringTest {
     @Test
-    void shouldRetrieveQueryParameter(){
+    void shouldRetrieveQueryParameter() throws UnsupportedEncodingException {
         QueryString queryString = new QueryString("status=200");
         assertEquals("200", queryString.getParameter("status"));
 
     }
 
     @Test
-    void ShouldRetrieveOtherQueryParameter() {
+    void ShouldRetrieveOtherQueryParameter() throws UnsupportedEncodingException {
         QueryString queryString = new QueryString("status=404");
         assertEquals("404", queryString.getParameter("status"));
     }
 
     @Test
-    void ShouldRetrieveParameterByName() {
+    void ShouldRetrieveParameterByName() throws UnsupportedEncodingException {
         QueryString queryString = new QueryString("text=Hello");
         assertEquals(null, queryString.getParameter("status"));
         assertEquals("Hello", queryString.getParameter("text"));
     }
 
     @Test
-    void ShouldHandleMultipleParameters() {
+    void ShouldHandleMultipleParameters() throws UnsupportedEncodingException {
         QueryString queryString = new QueryString("text=Hello&status=200");
         assertEquals("200", queryString.getParameter("status"));
         assertEquals("Hello", queryString.getParameter("text"));
     }
     @Test
-    void ShouldSerializeQueryString(){
+    void ShouldSerializeQueryString() throws UnsupportedEncodingException {
         QueryString queryString = new QueryString("status=200");
         assertEquals("status=200", queryString.getQueryString());
         queryString.addParameter("body", "Hello");
