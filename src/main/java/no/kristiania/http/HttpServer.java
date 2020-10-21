@@ -2,6 +2,7 @@ package no.kristiania.http;
 
 import no.kristiania.database.Member;
 import no.kristiania.database.MemberDao;
+import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,9 +52,12 @@ public class HttpServer {
         dataSource.setUser(properties.getProperty("datasource.username"));
         dataSource.setPassword(properties.getProperty("datasource.password"));
 
+        Flyway.configure().dataSource(dataSource).load().migrate();
+
         HttpServer server = new HttpServer(8080, dataSource);
 
         logger.info("Started on port {}", 8080);
+
     }
 
     private void handleRequest(Socket clientSocket) throws IOException, SQLException {
