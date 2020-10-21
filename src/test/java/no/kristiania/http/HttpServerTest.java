@@ -1,5 +1,7 @@
 package no.kristiania.http;
 
+import no.kristiania.database.Member;
+import no.kristiania.database.MemberDao;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -67,39 +70,42 @@ class HttpServerTest {
 
     @Test
     void shouldReturn404onFileOutsideDocumentRoot() throws IOException {
-        HttpServer server = new HttpServer(10010, dataSource);
+        HttpServer server = new HttpServer(10007, dataSource);
         File documentRoot = new File("target/test-classes");
         Files.writeString(new File(documentRoot, "secret.txt").toPath(), "Super secret file");
-        HttpClient client = new HttpClient("localhost", 10010, "/../secret.txt");
+        HttpClient client = new HttpClient("localhost", 10007, "/../secret.txt");
         assertEquals(404, client.getResponseCode());
     }
 
     @Test
     void shouldReturnCorrectContentType() throws IOException {
-        HttpServer server = new HttpServer(10007, dataSource);
+        HttpServer server = new HttpServer(10008, dataSource);
         File documentRoot = new File("target/test-classes/public");
         documentRoot.mkdirs();
         Files.writeString(new File(documentRoot, "plain.txt").toPath(), "Plain text");
-        HttpClient client = new HttpClient("localhost", 10007, "/plain.txt");
+        HttpClient client = new HttpClient("localhost", 10008, "/plain.txt");
         assertEquals("text/plain", client.getResponseHeader("Content-Type"));
     }
 
     @Test
     void shouldPostMember() throws IOException {
-        HttpServer server = new HttpServer(10008, dataSource);
+        HttpServer server = new HttpServer(10009, dataSource);
         QueryString member = new QueryString("");
         member.addParameter("full_name", "Marius");
         member.addParameter("email_address", "austheim.marius@gmail.com");
-        new HttpClient("localhost", 10008, "/members", "POST", member);
+        new HttpClient("localhost", 10009, "/members", "POST", member);
         assertEquals(List.of("Marius"), server.getMemberNames());
     }
 
     @Test
-    void shouldDisplayExistingMember() throws IOException {
-        HttpServer server = new HttpServer(10009, dataSource);
-        server.getMemberNames().add("Petter");
-        HttpClient client = new HttpClient("localhost", 10009, "/projectMembers");
-        assertThat(client.getResponseBody().contains("<ul><li>Petter</li></ul>"));
+    void shouldDisplayExistingMember() throws IOException, SQLException {
+        HttpServer server = new HttpServer(10011, dataSource);
+        MemberDao memberDao = new MemberDao(dataSource);
+        Member member = new Member();
+        member.setName("Petter");
+        memberDao.insert(member);
+        HttpClient client = new HttpClient("localhost", 10011, "/projectMembers");
+        assertThat(client.getResponseBody().contains("<li>Petter</li>"));
     }
 
 }

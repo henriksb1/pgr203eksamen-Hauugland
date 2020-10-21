@@ -6,13 +6,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Project view</h1>
+<div class="container">
+    <h1>Project view</h1>
 
-<div id="projectMembers"></div>
+    <div id="projectMembers"></div>
 
-<div>
-    <a href="newWorker.html">Add new project member</a>
+    <div>
+        <a href="newWorker.html">Add new project member</a>
+    </div>
 </div>
+
 </body>
 <script>
 fetch("/projectMembers")

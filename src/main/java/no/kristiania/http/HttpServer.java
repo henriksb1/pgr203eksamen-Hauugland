@@ -81,6 +81,7 @@ public class HttpServer {
 
             Member member = new Member();
             member.setName(requestForm.getParameter("full_name"));
+            member.setEmail(requestForm.getParameter("email_address"));
             memberDao.insert(member);
 
 
@@ -111,7 +112,7 @@ public class HttpServer {
         if(requestTarget.equals("/projectMembers")){
             body = "<ul>";
             for(Member member : memberDao.list()){
-                body += "<li>" + member.getName() + "</li>";
+                body += "<li>" + member.getName() + " (Email: " + member.getEmail() + ") </li>";
             }
             body += "</ul>";
 
