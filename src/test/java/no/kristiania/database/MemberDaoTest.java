@@ -36,14 +36,18 @@ class MemberDaoTest {
     void shouldRetrieveAllMemberProperties() throws SQLException {
         Member member = exampleMember();
         memberDao.insert(member);
+        assertThat(member).hasNoNullFieldsOrProperties();
         assertThat(memberDao.retrieve(member.getId()))
+                .usingRecursiveComparison()
                 .isEqualTo(member);
     }
 
     private Member exampleMember() {
         Member member = new Member();
         member.setName(exampleMemberName());
+
         return member;
+
     }
 
     private String exampleMemberName() {

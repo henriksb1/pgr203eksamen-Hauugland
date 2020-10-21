@@ -3,10 +3,7 @@ package no.kristiania.database;
 import org.postgresql.ds.PGSimpleDataSource;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -43,15 +40,37 @@ public class MemberDao {
 
     public void insert(Member member) throws SQLException {
         try (Connection connection = datasource.getConnection()){
-            try(PreparedStatement statement = connection.prepareStatement("INSERT INTO members (member_name) values (?)")){
+            try(PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO members (member_name) values (?)",
+                    Statement.RETURN_GENERATED_KEYS
+            )){
                 statement.setString(1, member.getName());
                 statement.executeUpdate();
+
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    generatedKeys.next();
+                    member.setId(generatedKeys.getLong("id"));
+                }
             }
         }
     }
 
-    public Member retrieve(Long id) {
-        return null;
+    public Member retrieve(Long id) throws SQLException {
+        try (Connection connection = datasource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members")) {
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        Member member = new Member();
+                        member.setId(rs.getLong("id"));
+                        member.setName(rs.getString("member_name"));
+                        return member;
+                    }else{
+                        return null;
+                    }
+
+                }
+            }
+        }
     }
 
 
