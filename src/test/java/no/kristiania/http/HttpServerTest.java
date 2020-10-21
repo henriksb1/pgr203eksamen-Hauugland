@@ -49,7 +49,8 @@ class HttpServerTest {
     @Test
     void shouldReturnFileContent() throws IOException {
         HttpServer server = new HttpServer(10005, dataSource);
-        File documentRoot = new File("target/test-classes");
+        File documentRoot = new File("target/test-classes/public");
+        documentRoot.mkdirs();
         String fileContent = "Hello " + new Date();
         Files.writeString(new File(documentRoot, "index.html").toPath(), fileContent);
         HttpClient client = new HttpClient("localhost", 10005, "/index.html");
@@ -63,10 +64,21 @@ class HttpServerTest {
         HttpClient client = new HttpClient("localhost", 10006, "/missingFile");
         assertEquals(404, client.getResponseCode());
     }
+
+    @Test
+    void shouldReturn404onFileOutsideDocumentRoot() throws IOException {
+        HttpServer server = new HttpServer(10010, dataSource);
+        File documentRoot = new File("target/test-classes");
+        Files.writeString(new File(documentRoot, "secret.txt").toPath(), "Super secret file");
+        HttpClient client = new HttpClient("localhost", 10010, "/../secret.txt");
+        assertEquals(404, client.getResponseCode());
+    }
+
     @Test
     void ShouldReturnCorrectContentType() throws IOException {
         HttpServer server = new HttpServer(10007, dataSource);
-        File documentRoot = new File("target/test-classes");
+        File documentRoot = new File("target/test-classes/public");
+        documentRoot.mkdirs();
         Files.writeString(new File(documentRoot, "plain.txt").toPath(), "Plain text");
         HttpClient client = new HttpClient("localhost", 10007, "/plain.txt");
         assertEquals("text/plain", client.getResponseHeader("Content-Type"));
@@ -89,4 +101,5 @@ class HttpServerTest {
         HttpClient client = new HttpClient("localhost", 10009, "/projectMembers");
         assertThat(client.getResponseBody().contains("<ul><li>Petter</li></ul>"));
     }
+
 }

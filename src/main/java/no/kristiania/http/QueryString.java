@@ -3,6 +3,7 @@ package no.kristiania.http;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,11 +11,11 @@ import java.util.Map;
 public class QueryString {
     private Map<String, String> parameters = new LinkedHashMap<>();
 
-    public QueryString(String queryString) throws UnsupportedEncodingException {
+    public QueryString(String queryString) {
         if (queryString.isEmpty()) return;
         for (String parameter : queryString.split("&")) {
             int equalPos = parameter.indexOf("=");
-            String value = URLDecoder.decode(parameter.substring(equalPos+1), "UTF-8");
+            String value = URLDecoder.decode(parameter.substring(equalPos+1), StandardCharsets.UTF_8);
             String parameterName = parameter.substring(0, equalPos);
             parameters.put(parameterName, value);
         }

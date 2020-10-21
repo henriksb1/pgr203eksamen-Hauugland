@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,7 @@ public class HttpServer {
             member.setName(requestForm.getParameter("full_name"));
             memberDao.insert(member);
 
+
             HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
             responseMessage.setHeader("Location", "http://localhost:8080/index.html");
             responseMessage.setHeader("Connection", "close");
@@ -122,12 +124,13 @@ public class HttpServer {
     }
 
     private void handleFileRequest(Socket clientSocket, String requestTarget) throws IOException {
-
-        try(InputStream inputStream = getClass().getResourceAsStream(requestTarget)){
-            if(inputStream == null) {
+        URL requestedResource = getClass().getResource("/public" + requestTarget);
+        String rootPath = getClass().getResource("/public").getPath();
+        if(requestedResource == null || !requestedResource.getPath().startsWith(rootPath)){
                 writeResponse(clientSocket, "404", requestTarget + " not found");
                 return;
-            }
+        }
+        try(InputStream inputStream = getClass().getResourceAsStream("/public" + requestTarget)){
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             inputStream.transferTo(buffer);
 
