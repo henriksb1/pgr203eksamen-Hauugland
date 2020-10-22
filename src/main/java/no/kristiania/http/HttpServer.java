@@ -47,9 +47,9 @@ public class HttpServer {
             properties.load(fileReader);
         }
         PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl(properties.getProperty("datasource.url"));
-        dataSource.setUser(properties.getProperty("datasource.username"));
-        dataSource.setPassword(properties.getProperty("datasource.password"));
+        dataSource.setUrl(properties.getProperty("dataSource.url"));
+        dataSource.setUser(properties.getProperty("dataSource.username"));
+        dataSource.setPassword(properties.getProperty("dataSource.password"));
 
         Flyway.configure().dataSource(dataSource).load().migrate();
 
