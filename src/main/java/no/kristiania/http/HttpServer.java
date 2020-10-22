@@ -31,7 +31,7 @@ public class HttpServer {
         new Thread(() ->{
             while(true) {
                     try {
-                        Socket socket = serverSocket.accept()
+                        Socket socket = serverSocket.accept();
                         handleRequest(socket);
                     } catch (Exception e) {
                     e.printStackTrace();
