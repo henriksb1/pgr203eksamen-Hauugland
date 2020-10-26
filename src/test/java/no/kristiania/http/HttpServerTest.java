@@ -108,4 +108,15 @@ class HttpServerTest {
         assertThat(client.getResponseBody().contains("<li>Petter</li>"));
     }
 
+    @Test
+    void shouldPostNewTask() throws IOException {
+        HttpServer server = new HttpServer(10012, dataSource);
+        QueryString member = new QueryString("");
+        member.addParameter("full_name", "Marius");
+        member.addParameter("email_address", "austheim.marius@gmail.com");
+        HttpClient client = new HttpClient("localhost", 10012, "/members", "POST", member);
+        assertEquals(302, client.getResponseCode());
+        assertEquals(List.of("Marius"), server.getMemberNames());
+    }
+
 }

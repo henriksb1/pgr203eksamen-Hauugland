@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Add project member</title>
+    <title>Add Project Tasks</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
     <h1>Add project member</h1>
 
-    <form method="POST" action="/members">
-        <div><label>Member name: <input type="text" name="full_name" /></label></div>
-        <div><label>Email address: <input type="email" name="email_address" /></label></div>
+    <form method="POST" action="/newProjectTasks">
+        <div><label>Task name: <input type="text" name="task_name" /></label></div>
+        <div><label>Display color: <input type="color" name="color" /></label></div>
         <button>Add</button>
     </form>
 
