@@ -16,7 +16,7 @@ public class ProjectTaskDao {
     public List<ProjectTask> list() throws SQLException {
         List<ProjectTask>  tasks = new ArrayList<>();
         try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members")) {
+            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM project_tasks")) {
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
                         //ProjectTask projectTask = new ProjectTask();
@@ -29,8 +29,10 @@ public class ProjectTaskDao {
         return tasks;
     }
 
-    private ProjectTask mapRowToTask(ResultSet rs) {
-        return new ProjectTask();
+    private ProjectTask mapRowToTask(ResultSet rs) throws SQLException {
+        ProjectTask projectTask = new ProjectTask();
+        projectTask.setName(rs.getString("task_name"));
+        return projectTask;
     }
 
     public void insert(ProjectTask task) throws SQLException {
@@ -48,5 +50,9 @@ public class ProjectTaskDao {
                 }
             }
         }
+    }
+
+    public ProjectTask retrieve(long id) {
+        return null;
     }
 }

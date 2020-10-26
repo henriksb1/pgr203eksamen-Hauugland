@@ -37,7 +37,14 @@ public class ProjectTaskDaoTest {
     }
 
     @Test
-    void shouldRetrieveAllProjectTaskProperties(){
+    void shouldRetrieveAllProjectTaskProperties() throws SQLException {
+        projectTaskDao.insert(exampleTask());
+        projectTaskDao.insert(exampleTask());
+        ProjectTask task = exampleTask();
+        projectTaskDao.insert(task);
+        assertThat(projectTaskDao.retrieve(task.getId()))
+                .usingRecursiveComparison()
+                .isEqualTo(task);
 
     }
 
