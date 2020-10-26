@@ -32,6 +32,7 @@ public class ProjectTaskDao {
     private ProjectTask mapRowToTask(ResultSet rs) throws SQLException {
         ProjectTask projectTask = new ProjectTask();
         projectTask.setName(rs.getString("task_name"));
+        projectTask.setId(rs.getLong("id"));
         return projectTask;
     }
 
@@ -52,7 +53,19 @@ public class ProjectTaskDao {
         }
     }
 
-    public ProjectTask retrieve(long id) {
-        return null;
+    public ProjectTask retrieve(long id) throws SQLException {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM project_tasks WHERE id = ?")) {
+                statement.setLong(1, id);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        return mapRowToTask(rs);
+                    }else{
+                        return null;
+                    }
+
+                }
+            }
+        }
     }
 }
