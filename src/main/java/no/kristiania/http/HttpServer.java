@@ -24,7 +24,8 @@ public class HttpServer {
     private final MemberDao memberDao;
     private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
     private Map<String, HttpController> controllers = Map.of(
-            "/newProjectTasks", new ProjectTaskPostController()
+            "/newProjectTasks", new ProjectTaskPostController(),
+            "/projectTasks", new ProjectTaskGetController()
     );
 
     public HttpServer(int port, DataSource dataSource) throws IOException {
@@ -84,9 +85,15 @@ public class HttpServer {
             if(requestPath.equals("/echo")) {
                 handleEchoRequest(clientSocket, requestTarget, questionPos);
 
-            }else if(requestPath.equals("/projectMembers")){
+            }else if(requestPath.equals("/projectMembers") || requestPath.equals("/")){
                 handleGetMembers(clientSocket, requestTarget);
             }else{
+                HttpController controller = controllers.get(requestPath);
+
+                if(controller != null ){
+                    controller.handle(requestLine, clientSocket);
+                }
+
                 handleFileRequest(clientSocket, requestPath);
             }
         }
