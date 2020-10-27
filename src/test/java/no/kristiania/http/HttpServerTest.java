@@ -111,12 +111,16 @@ class HttpServerTest {
     @Test
     void shouldPostNewTask() throws IOException {
         HttpServer server = new HttpServer(10012, dataSource);
-        QueryString member = new QueryString("");
-        member.addParameter("full_name", "Marius");
-        member.addParameter("email_address", "austheim.marius@gmail.com");
-        HttpClient client = new HttpClient("localhost", 10012, "/members", "POST", member);
-        assertEquals(302, client.getResponseCode());
-        assertEquals(List.of("Marius"), server.getMemberNames());
+        QueryString task = new QueryString("");
+        task.addParameter("task_name", "Male");
+        task.addParameter("color", "black");
+        HttpClient postClient = new HttpClient("localhost", 10012, "/newProjectTasks", "POST", task);
+        assertEquals(302, postClient.getResponseCode());
+
+        HttpClient getClient = new HttpClient("localhost", 10012, "/projectTasks");
+        assertThat(getClient.getResponseBody().contains("<li>Male</li>"));
+
+
     }
 
 }

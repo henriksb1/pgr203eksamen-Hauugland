@@ -15,12 +15,17 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+
 
 public class HttpServer {
     private List<String> memberNames = new ArrayList<>();
     private final MemberDao memberDao;
     private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
+    private Map<String, HttpController> controllers = Map.of(
+            "/newProjectTasks", new ProjectTaskPostController()
+    );
 
     public HttpServer(int port, DataSource dataSource) throws IOException {
 
@@ -66,71 +71,107 @@ public class HttpServer {
 
         String requestMethod = requestLine.split(" ")[0];
         String requestTarget = requestLine.split(" ")[1];
+        int questionPos = requestTarget.indexOf('?');
+        String requestPath = questionPos != -1 ? requestTarget.substring(0, questionPos) : requestTarget;
 
         if(requestMethod.equals("POST")){
-            HttpMessage requestMessage = new HttpMessage(requestLine);
-            requestMessage.readHeaders(clientSocket);
-
-            int contentLength = Integer.parseInt(requestMessage.getHeader("Content-Length"));
-            StringBuilder body = new StringBuilder();
-            for (int i = 0; i < contentLength; i++) {
-                body.append((char)clientSocket.getInputStream().read());
+            if(requestPath.equals("/members")){
+                handlePostMember(clientSocket, requestLine);
+            }else {
+                getController(requestPath).handle(requestLine, clientSocket);
             }
+        } else {
+            if(requestPath.equals("/echo")) {
+                handleEchoRequest(clientSocket, requestTarget, questionPos);
 
-            QueryString requestForm = new QueryString(body.toString());
-            memberNames.add(requestForm.getParameter("full_name"));
+            }else if(requestPath.equals("/projectMembers")){
+                handleGetMembers(clientSocket, requestTarget);
+            }else{
+                handleFileRequest(clientSocket, requestPath);
+            }
+        }
+    }
 
-            Member member = new Member();
-            member.setName(requestForm.getParameter("full_name"));
-            member.setEmail(requestForm.getParameter("email_address"));
-            memberDao.insert(member);
 
+    private void handleEchoRequest(Socket clientSocket, String requestTarget, int questionPos) throws IOException {
+        String responseCode = "200";
+        String body = "<h1>Hello World!<h1>";
+        if (questionPos != -1) {
+            QueryString queryString = new QueryString(requestTarget.substring(questionPos + 1));
+            if (queryString.getParameter("status") != null) {
+                responseCode = queryString.getParameter("status");
+            }
+            if (queryString.getParameter("body") != null) {
+                body = queryString.getParameter("body");
+            }
+        }
 
+            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 " + responseCode + " OK");
+            responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+            responseMessage.setHeader("Content-Type", "text/plain");
+            responseMessage.setHeader("Connection", "close");
+            responseMessage.setBody(body);
+            responseMessage.write(clientSocket);
+
+    }
+
+    private void handleGetMembers(Socket clientSocket, String requestTarget) throws SQLException, IOException {
+        String body = "<ul>";
+        for(Member member : memberDao.list()){
+            body += "<li>" + member.getName() + " (Email: " + member.getEmail() + ") </li>";
+        }
+        body += "</ul>";
+
+        if(requestTarget.equals("/")){
             HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
             responseMessage.setHeader("Location", "http://localhost:8080/index.html");
             responseMessage.setHeader("Connection", "close");
-            responseMessage.setHeader("Content-Length", "2");
+            responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+            responseMessage.setBody(body);
             responseMessage.write(clientSocket);
-            clientSocket.getOutputStream().write("OK".getBytes());
-            return;
-        } else if(requestMethod.equals("GET")){
-            if(requestTarget.equals("/")){
-                HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
-                responseMessage.setHeader("Location", "http://localhost:8080/index.html");
-                responseMessage.setHeader("Connection", "close");
-                responseMessage.setHeader("Content-Length", "2");
-                responseMessage.write(clientSocket);
-                clientSocket.getOutputStream().write("OK".getBytes());
-            }
-
+        }else{
+            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+            responseMessage.setHeader("Connection", "close");
+            responseMessage.setHeader("Content-Type", "text/html");
+            responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+            responseMessage.setBody(body);
+            responseMessage.write(clientSocket);
         }
 
-        String responseCode = null;
-        String body = null;
 
-        int questionPos = requestTarget.indexOf('?');
 
-        if(requestTarget.equals("/projectMembers")){
-            body = "<ul>";
-            for(Member member : memberDao.list()){
-                body += "<li>" + member.getName() + " (Email: " + member.getEmail() + ") </li>";
-            }
-            body += "</ul>";
+    }
 
-        } else if (questionPos != -1){
-            QueryString queryString = new QueryString(requestTarget.substring(questionPos + 1));
-            responseCode = queryString.getParameter("status");
-            body = queryString.getParameter("body");
-        }else if(!requestTarget.equals("/echo")) {
-            handleFileRequest(clientSocket, requestTarget);
-            return;
+    private HttpController getController(String requestTarget) {
+        return controllers.get(requestTarget);
+    }
+
+    private void handlePostMember(Socket clientSocket, String requestLine) throws IOException, SQLException {
+        HttpMessage requestMessage = new HttpMessage(requestLine);
+        requestMessage.readHeaders(clientSocket);
+
+        int contentLength = Integer.parseInt(requestMessage.getHeader("Content-Length"));
+        StringBuilder body = new StringBuilder();
+        for (int i = 0; i < contentLength; i++) {
+            body.append((char) clientSocket.getInputStream().read());
         }
 
-        if(body == null) body = "Hello World";
-        if(responseCode == null) responseCode = "200";
+        QueryString requestForm = new QueryString(body.toString());
+        memberNames.add(requestForm.getParameter("full_name"));
+
+        Member member = new Member();
+        member.setName(requestForm.getParameter("full_name"));
+        member.setEmail(requestForm.getParameter("email_address"));
+        memberDao.insert(member);
 
 
-        writeResponse(clientSocket, responseCode, body);
+        HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
+        responseMessage.setHeader("Location", "http://localhost:8080/index.html");
+        responseMessage.setHeader("Connection", "close");
+        responseMessage.setHeader("Content-Length", "2");
+        responseMessage.write(clientSocket);
+        clientSocket.getOutputStream().write("OK".getBytes());
+        return;
     }
 
     private void handleFileRequest(Socket clientSocket, String requestTarget) throws IOException {
