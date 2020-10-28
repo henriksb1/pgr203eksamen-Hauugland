@@ -25,9 +25,9 @@ public class HttpServer {
     private final MemberDao memberDao;
     private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
     private final Map<String, HttpController> controllers;
+    private final ServerSocket serverSocket;
 
     public HttpServer(int port, DataSource dataSource) throws IOException {
-
         memberDao = new MemberDao(dataSource);
         ProjectTaskDao projectTaskDao = new ProjectTaskDao(dataSource);
         controllers = Map.of(
@@ -35,7 +35,7 @@ public class HttpServer {
                 "/projectTasks", new ProjectTaskGetController(projectTaskDao)
         );
 
-        ServerSocket serverSocket = new ServerSocket(port);
+        serverSocket = new ServerSocket(port);
 
         new Thread(() ->{
             while(true) {
@@ -48,6 +48,10 @@ public class HttpServer {
             }
         }).start();
 
+    }
+
+    public int getPort() {
+        return serverSocket.getLocalPort();
     }
 
     public static void main(String[] args) throws IOException {
