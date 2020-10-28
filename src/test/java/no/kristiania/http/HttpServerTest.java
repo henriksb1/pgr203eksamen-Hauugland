@@ -108,4 +108,19 @@ class HttpServerTest {
         assertThat(client.getResponseBody().contains("<li>Petter</li>"));
     }
 
+    @Test
+    void shouldPostNewTask() throws IOException {
+        HttpServer server = new HttpServer(10012, dataSource);
+        QueryString task = new QueryString("");
+        task.addParameter("task_name", "Male");
+        task.addParameter("color", "black");
+        HttpClient postClient = new HttpClient("localhost", 10012, "/newProjectTasks", "POST", task);
+        assertEquals(302, postClient.getResponseCode());
+
+        HttpClient getClient = new HttpClient("localhost", 10012, "/projectTasks");
+        assertThat(getClient.getResponseBody().contains("<li>Male</li>"));
+
+
+    }
+
 }

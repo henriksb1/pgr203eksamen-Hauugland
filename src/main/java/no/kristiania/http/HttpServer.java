@@ -2,6 +2,7 @@ package no.kristiania.http;
 
 import no.kristiania.database.Member;
 import no.kristiania.database.MemberDao;
+import no.kristiania.database.ProjectTaskDao;
 import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
@@ -15,16 +16,24 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+
 public class HttpServer {
-    private List<String> memberNames = new ArrayList<>();
+    private final List<String> memberNames = new ArrayList<>();
     private final MemberDao memberDao;
     private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
+    private final Map<String, HttpController> controllers;
 
     public HttpServer(int port, DataSource dataSource) throws IOException {
 
         memberDao = new MemberDao(dataSource);
+        ProjectTaskDao projectTaskDao = new ProjectTaskDao(dataSource);
+        controllers = Map.of(
+                "/newProjectTasks", new ProjectTaskPostController(projectTaskDao),
+                "/projectTasks", new ProjectTaskGetController(projectTaskDao)
+        );
 
         ServerSocket serverSocket = new ServerSocket(port);
 
@@ -38,7 +47,6 @@ public class HttpServer {
                 }
             }
         }).start();
-
 
     }
 
@@ -56,7 +64,7 @@ public class HttpServer {
 
         HttpServer server = new HttpServer(8080, dataSource);
 
-        logger.info("Started on port {}", 8080);
+        logger.info("Started on {}", "http://localhost:8080/");
 
     }
 
@@ -66,71 +74,100 @@ public class HttpServer {
 
         String requestMethod = requestLine.split(" ")[0];
         String requestTarget = requestLine.split(" ")[1];
+        int questionPos = requestTarget.indexOf('?');
+        String requestPath = questionPos != -1 ? requestTarget.substring(0, questionPos) : requestTarget;
 
         if(requestMethod.equals("POST")){
-            HttpMessage requestMessage = new HttpMessage(requestLine);
-            requestMessage.readHeaders(clientSocket);
-
-            int contentLength = Integer.parseInt(requestMessage.getHeader("Content-Length"));
-            StringBuilder body = new StringBuilder();
-            for (int i = 0; i < contentLength; i++) {
-                body.append((char)clientSocket.getInputStream().read());
+            if(requestPath.equals("/members")){
+                handlePostMember(clientSocket, requestLine);
+            }else {
+                getController(requestPath).handle(requestLine, clientSocket);
             }
+        } else {
+            if(requestPath.equals("/echo")) {
+                handleEchoRequest(clientSocket, requestTarget, questionPos);
 
-            QueryString requestForm = new QueryString(body.toString());
-            memberNames.add(requestForm.getParameter("full_name"));
+            }else if(requestPath.equals("/projectMembers") || requestPath.equals("/")){
+                handleGetMembers(clientSocket, requestTarget);
+            }else{
+                HttpController controller = controllers.get(requestPath);
 
-            Member member = new Member();
-            member.setName(requestForm.getParameter("full_name"));
-            member.setEmail(requestForm.getParameter("email_address"));
-            memberDao.insert(member);
+                if(controller != null ){
+                    controller.handle(requestLine, clientSocket);
+                }
 
-
-            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
-            responseMessage.setHeader("Location", "http://localhost:8080/index.html");
-            responseMessage.setHeader("Connection", "close");
-            responseMessage.setHeader("Content-Length", "2");
-            responseMessage.write(clientSocket);
-            clientSocket.getOutputStream().write("OK".getBytes());
-            return;
-        } else if(requestMethod.equals("GET")){
-            if(requestTarget.equals("/")){
-                HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
-                responseMessage.setHeader("Location", "http://localhost:8080/index.html");
-                responseMessage.setHeader("Connection", "close");
-                responseMessage.setHeader("Content-Length", "2");
-                responseMessage.write(clientSocket);
-                clientSocket.getOutputStream().write("OK".getBytes());
+                handleFileRequest(clientSocket, requestPath);
             }
-
         }
+    }
 
-        String responseCode = null;
-        String body = null;
 
-        int questionPos = requestTarget.indexOf('?');
-
-        if(requestTarget.equals("/projectMembers")){
-            body = "<ul>";
-            for(Member member : memberDao.list()){
-                body += "<li>" + member.getName() + " (Email: " + member.getEmail() + ") </li>";
-            }
-            body += "</ul>";
-
-        } else if (questionPos != -1){
+    private void handleEchoRequest(Socket clientSocket, String requestTarget, int questionPos) throws IOException {
+        String responseCode = "200";
+        String body = "<h1>Hello World!<h1>";
+        if (questionPos != -1) {
             QueryString queryString = new QueryString(requestTarget.substring(questionPos + 1));
-            responseCode = queryString.getParameter("status");
-            body = queryString.getParameter("body");
-        }else if(!requestTarget.equals("/echo")) {
-            handleFileRequest(clientSocket, requestTarget);
-            return;
+            if (queryString.getParameter("status") != null) {
+                responseCode = queryString.getParameter("status");
+            }
+            if (queryString.getParameter("body") != null) {
+                body = queryString.getParameter("body");
+            }
         }
 
-        if(body == null) body = "Hello World";
-        if(responseCode == null) responseCode = "200";
+            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 " + responseCode + " OK");
+            responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+            responseMessage.setHeader("Content-Type", "text/plain");
+            responseMessage.setBody(body);
+            responseMessage.write(clientSocket);
+
+    }
+
+    private void handleGetMembers(Socket clientSocket, String requestTarget) throws SQLException, IOException {
+        StringBuilder body = new StringBuilder("<ul>");
+        for(Member member : memberDao.list()){
+            body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li>");
+        }
+        body.append("</ul>");
+
+        HttpMessage responseMessage;
+        if(requestTarget.equals("/")){
+            responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
+            responseMessage.setHeader("Location", "http://localhost:8080/index.html");
+        }else{
+            responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+            responseMessage.setHeader("Content-Type", "text/html");
+        }
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+        responseMessage.setBody(body.toString());
+        responseMessage.write(clientSocket);
 
 
-        writeResponse(clientSocket, responseCode, body);
+    }
+
+    private HttpController getController(String requestTarget) {
+        return controllers.get(requestTarget);
+    }
+
+    private void handlePostMember(Socket clientSocket, String requestLine) throws IOException, SQLException {
+        HttpMessage requestMessage = new HttpMessage(requestLine);
+        requestMessage.readHeaders(clientSocket);
+
+        String body = HttpMessage.readBody(clientSocket, requestMessage.getHeader("Content-Length"));
+
+        QueryString requestForm = new QueryString(body);
+        memberNames.add(requestForm.getParameter("full_name"));
+
+        Member member = new Member();
+        member.setName(requestForm.getParameter("full_name"));
+        member.setEmail(requestForm.getParameter("email_address"));
+        memberDao.insert(member);
+
+
+        HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
+        responseMessage.setHeader("Location", "http://localhost:8080/projectMembers.html");
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+        responseMessage.write(clientSocket);
     }
 
     private void handleFileRequest(Socket clientSocket, String requestTarget) throws IOException {
@@ -160,7 +197,6 @@ public class HttpServer {
             }
 
             responseMessage.setHeader("Content-Length", String.valueOf(buffer.toByteArray().length));
-            responseMessage.setHeader("Connection", "close");
 
             responseMessage.write(clientSocket);
             clientSocket.getOutputStream().write(buffer.toByteArray());
@@ -171,7 +207,6 @@ public class HttpServer {
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 " + responseCode + " OK");
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.setHeader("Content-Type", "text/plain");
-        responseMessage.setHeader("Connection", "close");
         responseMessage.write(clientSocket);
         clientSocket.getOutputStream().write(body.getBytes());
 
