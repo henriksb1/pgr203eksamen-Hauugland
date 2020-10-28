@@ -5,12 +5,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectTaskDao {
-    private final DataSource dataSource;
+public class ProjectTaskDao extends AbstractDao<ProjectTask>{
 
     public ProjectTaskDao(DataSource dataSource) {
-
-        this.dataSource = dataSource;
+        super(dataSource);
     }
 
     public void insert(ProjectTask task) throws SQLException {
@@ -31,22 +29,11 @@ public class ProjectTaskDao {
     }
 
     public ProjectTask retrieve(long id) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM project_tasks WHERE id = ?")) {
-                statement.setLong(1, id);
-                try (ResultSet rs = statement.executeQuery()) {
-                    if (rs.next()) {
-                        return mapRow(rs);
-                    }else{
-                        return null;
-                    }
-
-                }
-            }
-        }
+        return retrieve(id, "SELECT * FROM project_tasks WHERE id = ?");
     }
 
-    private ProjectTask mapRow(ResultSet rs) throws SQLException {
+    @Override
+    protected ProjectTask mapRow(ResultSet rs) throws SQLException {
         ProjectTask projectTask = new ProjectTask();
         projectTask.setName(rs.getString("task_name"));
         projectTask.setId(rs.getLong("id"));
