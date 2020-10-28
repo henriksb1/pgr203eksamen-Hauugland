@@ -64,7 +64,7 @@ public class HttpServer {
 
         HttpServer server = new HttpServer(8080, dataSource);
 
-        logger.info("Started on port {}", 8080);
+        logger.info("Started on {}", "http://localhost:8080/");
 
     }
 
@@ -165,7 +165,7 @@ public class HttpServer {
 
 
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
-        responseMessage.setHeader("Location", "http://localhost:8080/index.html");
+        responseMessage.setHeader("Location", "http://localhost:8080/projectMembers.html");
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
     }
