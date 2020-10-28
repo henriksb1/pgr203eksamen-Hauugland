@@ -30,7 +30,6 @@ public class ProjectTaskPostController implements HttpController {
 
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
         responseMessage.setHeader("Location", "http://localhost:8080/index.html");
-        responseMessage.setHeader("Connection", "close");
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
 

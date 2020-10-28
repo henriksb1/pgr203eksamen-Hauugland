@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Members</title>
+</head>
+<body>
+    <form method="post" action="/updateMember">
+        <p>Member: <select name="memberId" id="memberId"></select> </p>
+        <p>New Task: <select name="taskId" id="taskId"></select> </p>
+    </form>
+</body>
+<script>
+    fetch("/memberOptions")
+        .then(function(response) {
+            return response.text();
+        }).then(function(text) {
+        document.getElementById("memberId").innerHTML = text;
+    });
+    fetch("/taskOptions")
+        .then(function(response) {
+            return response.text();
+        }).then(function(text) {
+        document.getElementById("taskId").innerHTML = text;
+    });
+</script>
+</html>

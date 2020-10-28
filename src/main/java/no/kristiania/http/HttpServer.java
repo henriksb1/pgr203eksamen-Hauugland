@@ -32,7 +32,10 @@ public class HttpServer {
         ProjectTaskDao projectTaskDao = new ProjectTaskDao(dataSource);
         controllers = Map.of(
                 "/newProjectTasks", new ProjectTaskPostController(projectTaskDao),
-                "/projectTasks", new ProjectTaskGetController(projectTaskDao)
+                "/projectTasks", new ProjectTaskGetController(projectTaskDao),
+                "/taskOptions", new ProjectTaskOptionsController(projectTaskDao),
+                "/memberOptions", new ProjectMemberOptionsController(projectTaskDao)
+
         );
 
         serverSocket = new ServerSocket(port);
