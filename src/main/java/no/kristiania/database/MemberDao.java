@@ -1,21 +1,17 @@
 package no.kristiania.database;
 
-import org.postgresql.ds.PGSimpleDataSource;
-
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class MemberDao {
-
     private DataSource datasource;
 
     public MemberDao(DataSource dataSource) {
+
         this.datasource = dataSource;
     }
-
 
     public void insert(Member member) throws SQLException {
         try (Connection connection = datasource.getConnection()){
@@ -58,7 +54,6 @@ public class MemberDao {
         member.setEmail(rs.getString("email"));
         return member;
     }
-
 
     public List<Member> list() throws SQLException {
         List<Member>  members = new ArrayList<>();

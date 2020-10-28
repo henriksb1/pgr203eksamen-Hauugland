@@ -13,29 +13,6 @@ public class ProjectTaskDao {
         this.dataSource = dataSource;
     }
 
-    public List<ProjectTask> list() throws SQLException {
-        List<ProjectTask>  tasks = new ArrayList<>();
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM project_tasks")) {
-                try (ResultSet rs = statement.executeQuery()) {
-                    while (rs.next()) {
-                        //ProjectTask projectTask = new ProjectTask();
-                        //projectTask.setName(rs.getString(""));
-                        tasks.add(mapRowToTask(rs));
-                    }
-                }
-            }
-        }
-        return tasks;
-    }
-
-    private ProjectTask mapRowToTask(ResultSet rs) throws SQLException {
-        ProjectTask projectTask = new ProjectTask();
-        projectTask.setName(rs.getString("task_name"));
-        projectTask.setId(rs.getLong("id"));
-        return projectTask;
-    }
-
     public void insert(ProjectTask task) throws SQLException {
         try (Connection connection = dataSource.getConnection()){
             try(PreparedStatement statement = connection.prepareStatement(
@@ -67,5 +44,28 @@ public class ProjectTaskDao {
                 }
             }
         }
+    }
+
+    private ProjectTask mapRowToTask(ResultSet rs) throws SQLException {
+        ProjectTask projectTask = new ProjectTask();
+        projectTask.setName(rs.getString("task_name"));
+        projectTask.setId(rs.getLong("id"));
+        return projectTask;
+    }
+
+    public List<ProjectTask> list() throws SQLException {
+        List<ProjectTask>  tasks = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM project_tasks")) {
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        //ProjectTask projectTask = new ProjectTask();
+                        //projectTask.setName(rs.getString(""));
+                        tasks.add(mapRowToTask(rs));
+                    }
+                }
+            }
+        }
+        return tasks;
     }
 }
