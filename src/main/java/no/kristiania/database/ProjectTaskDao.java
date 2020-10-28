@@ -36,7 +36,7 @@ public class ProjectTaskDao {
                 statement.setLong(1, id);
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
-                        return mapRowToTask(rs);
+                        return mapRow(rs);
                     }else{
                         return null;
                     }
@@ -46,7 +46,7 @@ public class ProjectTaskDao {
         }
     }
 
-    private ProjectTask mapRowToTask(ResultSet rs) throws SQLException {
+    private ProjectTask mapRow(ResultSet rs) throws SQLException {
         ProjectTask projectTask = new ProjectTask();
         projectTask.setName(rs.getString("task_name"));
         projectTask.setId(rs.getLong("id"));
@@ -61,7 +61,7 @@ public class ProjectTaskDao {
                     while (rs.next()) {
                         //ProjectTask projectTask = new ProjectTask();
                         //projectTask.setName(rs.getString(""));
-                        tasks.add(mapRowToTask(rs));
+                        tasks.add(mapRow(rs));
                     }
                 }
             }

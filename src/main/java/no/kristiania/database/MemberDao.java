@@ -5,12 +5,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MemberDao {
-    private final DataSource dataSource;
+public class MemberDao extends AbstractDao<Member> {
 
     public MemberDao(DataSource dataSource) {
+        super(dataSource);
 
-        this.dataSource = dataSource;
     }
 
     public void insert(Member member) throws SQLException {
@@ -32,22 +31,11 @@ public class MemberDao {
     }
 
     public Member retrieve(Long id) throws SQLException {
-        try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members WHERE id = ?")) {
-                statement.setLong(1, id);
-                try (ResultSet rs = statement.executeQuery()) {
-                    if (rs.next()) {
-                        return mapRowToMember(rs);
-                    }else{
-                        return null;
-                    }
-
-                }
-            }
-        }
+        return retrieve(id, "SELECT * FROM members WHERE id = ?");
     }
 
-    private Member mapRowToMember(ResultSet rs) throws SQLException {
+    @Override
+    protected Member mapRow(ResultSet rs) throws SQLException {
         Member member = new Member();
         member.setId(rs.getLong("id"));
         member.setName(rs.getString("member_name"));
@@ -63,7 +51,7 @@ public class MemberDao {
                     while (rs.next()) {
                         Member member = new Member();
                         member.setName(rs.getString("member_name"));
-                        members.add(mapRowToMember(rs));
+                        members.add(mapRow(rs));
                     }
                 }
             }
