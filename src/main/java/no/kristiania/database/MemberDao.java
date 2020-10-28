@@ -16,27 +16,6 @@ public class MemberDao {
         this.datasource = dataSource;
     }
 
-    public static void main(String[] args) throws SQLException {
-        PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/teammembers");
-        dataSource.setUser("memberadmin");
-        dataSource.setPassword("V0E5!M@7eaM!");
-
-        MemberDao memberDao = new MemberDao(dataSource);
-
-
-        System.out.println("Whats the new member name?");
-        Scanner scanner = new Scanner(System.in);
-        String memberName = scanner.nextLine();
-
-        Member member = new Member();
-        member.setName(memberName);
-        memberDao.insert(member);
-        for (Member m : memberDao.list()) {
-            System.out.println(m);
-        }
-
-    }
 
     public void insert(Member member) throws SQLException {
         try (Connection connection = datasource.getConnection()){

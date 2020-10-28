@@ -1,6 +1,5 @@
 package no.kristiania.http;
 
-import no.kristiania.database.Member;
 import no.kristiania.database.ProjectTask;
 import no.kristiania.database.ProjectTaskDao;
 
@@ -21,13 +20,9 @@ public class ProjectTaskPostController implements HttpController {
         HttpMessage requestMessage = new HttpMessage(requestLine);
         requestMessage.readHeaders(clientSocket);
 
-        int contentLength = Integer.parseInt(requestMessage.getHeader("Content-Length"));
-        StringBuilder body = new StringBuilder();
-        for (int i = 0; i < contentLength; i++) {
-            body.append((char) clientSocket.getInputStream().read());
-        }
+        String body = HttpMessage.readBody(clientSocket, requestMessage.getHeader("Content-Length"));
 
-        QueryString requestForm = new QueryString(body.toString());
+        QueryString requestForm = new QueryString(body);
         ProjectTask projectTask = new ProjectTask();
         projectTask.setName(requestForm.getParameter("task_name"));
         projectTaskDao.insert(projectTask);
@@ -36,7 +31,7 @@ public class ProjectTaskPostController implements HttpController {
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
         responseMessage.setHeader("Location", "http://localhost:8080/index.html");
         responseMessage.setHeader("Connection", "close");
-        responseMessage.setHeader("Content-Length", "2");
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
 
     }

@@ -21,10 +21,10 @@ import java.util.Properties;
 
 
 public class HttpServer {
-    private List<String> memberNames = new ArrayList<>();
+    private final List<String> memberNames = new ArrayList<>();
     private final MemberDao memberDao;
     private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
-    private Map<String, HttpController> controllers;
+    private final Map<String, HttpController> controllers;
 
     public HttpServer(int port, DataSource dataSource) throws IOException {
 
@@ -118,35 +118,29 @@ public class HttpServer {
             HttpMessage responseMessage = new HttpMessage("HTTP/1.1 " + responseCode + " OK");
             responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
             responseMessage.setHeader("Content-Type", "text/plain");
-            responseMessage.setHeader("Connection", "close");
             responseMessage.setBody(body);
             responseMessage.write(clientSocket);
 
     }
 
     private void handleGetMembers(Socket clientSocket, String requestTarget) throws SQLException, IOException {
-        String body = "<ul>";
+        StringBuilder body = new StringBuilder("<ul>");
         for(Member member : memberDao.list()){
-            body += "<li>" + member.getName() + " (Email: " + member.getEmail() + ") </li>";
+            body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li>");
         }
-        body += "</ul>";
+        body.append("</ul>");
 
+        HttpMessage responseMessage;
         if(requestTarget.equals("/")){
-            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
+            responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
             responseMessage.setHeader("Location", "http://localhost:8080/index.html");
-            responseMessage.setHeader("Connection", "close");
-            responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
-            responseMessage.setBody(body);
-            responseMessage.write(clientSocket);
         }else{
-            HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
-            responseMessage.setHeader("Connection", "close");
+            responseMessage = new HttpMessage("HTTP/1.1 200 OK");
             responseMessage.setHeader("Content-Type", "text/html");
-            responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
-            responseMessage.setBody(body);
-            responseMessage.write(clientSocket);
         }
-
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+        responseMessage.setBody(body.toString());
+        responseMessage.write(clientSocket);
 
 
     }
@@ -159,13 +153,9 @@ public class HttpServer {
         HttpMessage requestMessage = new HttpMessage(requestLine);
         requestMessage.readHeaders(clientSocket);
 
-        int contentLength = Integer.parseInt(requestMessage.getHeader("Content-Length"));
-        StringBuilder body = new StringBuilder();
-        for (int i = 0; i < contentLength; i++) {
-            body.append((char) clientSocket.getInputStream().read());
-        }
+        String body = HttpMessage.readBody(clientSocket, requestMessage.getHeader("Content-Length"));
 
-        QueryString requestForm = new QueryString(body.toString());
+        QueryString requestForm = new QueryString(body);
         memberNames.add(requestForm.getParameter("full_name"));
 
         Member member = new Member();
@@ -176,11 +166,8 @@ public class HttpServer {
 
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
         responseMessage.setHeader("Location", "http://localhost:8080/index.html");
-        responseMessage.setHeader("Connection", "close");
-        responseMessage.setHeader("Content-Length", "2");
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
-        clientSocket.getOutputStream().write("OK".getBytes());
-        return;
     }
 
     private void handleFileRequest(Socket clientSocket, String requestTarget) throws IOException {
@@ -210,7 +197,6 @@ public class HttpServer {
             }
 
             responseMessage.setHeader("Content-Length", String.valueOf(buffer.toByteArray().length));
-            responseMessage.setHeader("Connection", "close");
 
             responseMessage.write(clientSocket);
             clientSocket.getOutputStream().write(buffer.toByteArray());
@@ -221,7 +207,6 @@ public class HttpServer {
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 " + responseCode + " OK");
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.setHeader("Content-Type", "text/plain");
-        responseMessage.setHeader("Connection", "close");
         responseMessage.write(clientSocket);
         clientSocket.getOutputStream().write(body.getBytes());
 

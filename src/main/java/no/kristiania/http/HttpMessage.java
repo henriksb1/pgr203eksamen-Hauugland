@@ -7,8 +7,8 @@ import java.util.Map;
 
 public class HttpMessage {
 
-    private String startLine;
-    private Map<String, String> headers = new HashMap<>();
+    private final String startLine;
+    private final Map<String, String> headers = new HashMap<>();
     private String body;
 
     public HttpMessage(String startLine){
@@ -39,6 +39,7 @@ public class HttpMessage {
 
     public void setHeader(String name, String value){
         headers.put(name, value);
+        headers.put("Connection", "close");
     }
 
     public void write(Socket socket) throws IOException {
