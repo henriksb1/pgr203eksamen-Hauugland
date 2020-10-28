@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectTaskDao {
-    private DataSource dataSource;
+    private final DataSource dataSource;
 
     public ProjectTaskDao(DataSource dataSource) {
 

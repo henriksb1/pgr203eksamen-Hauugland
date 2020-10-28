@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemberDao {
-    private DataSource datasource;
+    private final DataSource dataSource;
 
     public MemberDao(DataSource dataSource) {
 
-        this.datasource = dataSource;
+        this.dataSource = dataSource;
     }
 
     public void insert(Member member) throws SQLException {
-        try (Connection connection = datasource.getConnection()){
+        try (Connection connection = dataSource.getConnection()){
             try(PreparedStatement statement = connection.prepareStatement(
                     "INSERT INTO members (member_name, email) values (?, ?)",
                     Statement.RETURN_GENERATED_KEYS
@@ -32,7 +32,7 @@ public class MemberDao {
     }
 
     public Member retrieve(Long id) throws SQLException {
-        try (Connection connection = datasource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members WHERE id = ?")) {
                 statement.setLong(1, id);
                 try (ResultSet rs = statement.executeQuery()) {
@@ -57,7 +57,7 @@ public class MemberDao {
 
     public List<Member> list() throws SQLException {
         List<Member>  members = new ArrayList<>();
-        try (Connection connection = datasource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM members")) {
                 try (ResultSet rs = statement.executeQuery()) {
                     while (rs.next()) {
