@@ -34,8 +34,7 @@ public class HttpServer {
                 "/newProjectTasks", new ProjectTaskPostController(projectTaskDao),
                 "/projectTasks", new ProjectTaskGetController(projectTaskDao),
                 "/taskOptions", new ProjectTaskOptionsController(projectTaskDao),
-                "/memberOptions", new ProjectMemberOptionsController(projectTaskDao)
-
+                "/memberOptions", new ProjectMemberOptionsController(memberDao)
         );
 
         serverSocket = new ServerSocket(port);

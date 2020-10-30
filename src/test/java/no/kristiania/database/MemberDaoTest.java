@@ -11,10 +11,10 @@ import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MemberDaoTest {
+public class MemberDaoTest {
 
     private MemberDao memberDao;
-    private final Random random = new Random();
+    private static final Random random = new Random();
 
     @BeforeEach
     void setUp() {
@@ -47,7 +47,7 @@ class MemberDaoTest {
                 .isEqualTo(member);
     }
 
-    private Member exampleMember() {
+    public static Member exampleMember() {
         Member member = new Member();
         member.setName(exampleMemberName());
         member.setEmail(exampleMemberEmail());
@@ -55,12 +55,12 @@ class MemberDaoTest {
 
     }
 
-    private String exampleMemberName() {
+    private static String exampleMemberName() {
         String[] names = {"Petter", "Marius", "Thomine", "Oda"};
         return names[random.nextInt(names.length)];
     }
 
-    private String exampleMemberEmail() {
+    private static String exampleMemberEmail() {
         String[] emails = {"petter@gmail.com", "Marius@gmail.com", "Thomine@gmail.com", "Oda@gmail.com"};
         return emails[random.nextInt(emails.length)];
     }

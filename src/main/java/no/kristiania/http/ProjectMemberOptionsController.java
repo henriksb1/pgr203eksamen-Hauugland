@@ -1,5 +1,6 @@
 package no.kristiania.http;
 
+import no.kristiania.database.MemberDao;
 import no.kristiania.database.ProjectTaskDao;
 
 import java.io.IOException;
@@ -7,7 +8,7 @@ import java.net.Socket;
 import java.sql.SQLException;
 
 public class ProjectMemberOptionsController implements HttpController {
-    public ProjectMemberOptionsController(ProjectTaskDao projectTaskDao) {
+    public ProjectMemberOptionsController(MemberDao memberDao) {
     }
 
     @Override
@@ -16,9 +17,13 @@ public class ProjectMemberOptionsController implements HttpController {
         requestMessage.readHeaders(clientSocket);
 
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
-        String body = "<option>A</option><option>B</option>";
+        String body = getBody();
         responseMessage.setBody(body);
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
+    }
+
+    public String getBody() {
+        return "<option>A</option><option>B</option>";
     }
 }
