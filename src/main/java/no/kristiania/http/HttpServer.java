@@ -70,8 +70,8 @@ public class HttpServer {
 
         HttpServer server = new HttpServer(8080, dataSource);
 
+        logger.info("using database {}", dataSource.getUrl());
         logger.info("Started on {}", "http://localhost:8080/");
-
     }
 
     private void handleRequest(Socket clientSocket) throws IOException, SQLException {
