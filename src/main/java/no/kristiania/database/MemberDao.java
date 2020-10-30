@@ -24,6 +24,12 @@ public class MemberDao extends AbstractDao<Member> {
         return list("SELECT * FROM members");
     }
 
+    protected void mapEntityToPreparedStatement(PreparedStatement statement, Member entity) throws SQLException{
+        statement.setString(1, entity.getName());
+        statement.setString(2, entity.getEmail());
+        statement.executeUpdate();
+    }
+
     @Override
     protected Member mapRow(ResultSet rs) throws SQLException {
         Member member = new Member();
@@ -32,5 +38,4 @@ public class MemberDao extends AbstractDao<Member> {
         member.setEmail(rs.getString("email"));
         return member;
     }
-
 }

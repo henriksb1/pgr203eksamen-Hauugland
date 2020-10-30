@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractDao<T> {
+public abstract class AbstractDao<T extends IdEntity> {
     protected final DataSource dataSource;
 
     public AbstractDao(DataSource dataSource) {
@@ -42,35 +42,21 @@ public abstract class AbstractDao<T> {
         return list;
     }
 
-    public void insert(Member member, String sql) throws SQLException {
+    public void insert(T entity, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection()){
             try(PreparedStatement statement = connection.prepareStatement(
                     sql,
                     Statement.RETURN_GENERATED_KEYS
             )){
-                statement.setString(1, member.getName());
-                statement.setString(2, member.getEmail());
-                statement.executeUpdate();
+                mapEntityToPreparedStatement(statement, entity);
 
-                fillGeneratedKeys(member, statement);
+                fillGeneratedKeys(entity, statement);
             }
         }
     }
 
-    public void insert(ProjectTask projectTask, String sql) throws SQLException {
-        try (Connection connection = dataSource.getConnection()){
-            try(PreparedStatement statement = connection.prepareStatement(
-                    sql,
-                    Statement.RETURN_GENERATED_KEYS
-            )){
-                statement.setString(1, projectTask.getName());
-                statement.executeUpdate();
 
-                fillGeneratedKeys(projectTask, statement);
-            }
-        }
-    }
-
+    protected abstract void mapEntityToPreparedStatement(PreparedStatement statement, T entity) throws SQLException;
 
     public static void fillGeneratedKeys(IdEntity entity, PreparedStatement statement) throws SQLException {
         try (ResultSet generatedKeys = statement.getGeneratedKeys()) {

@@ -22,6 +22,11 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
         return list("SELECT * FROM project_tasks");
     }
 
+    protected void mapEntityToPreparedStatement(PreparedStatement statement, ProjectTask entity) throws SQLException{
+        statement.setString(1, entity.getName());
+        statement.executeUpdate();
+    }
+
     @Override
     protected ProjectTask mapRow(ResultSet rs) throws SQLException {
         ProjectTask projectTask = new ProjectTask();
