@@ -1,5 +1,6 @@
 package no.kristiania.database;
 
+import no.kristiania.http.ProjectMemberOptionsController;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,16 @@ public class MemberDaoTest {
         assertThat(memberDao.retrieve(member.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(member);
+    }
+
+    @Test
+    void shouldReturnMembersAsOptions() throws SQLException {
+        ProjectMemberOptionsController controller = new ProjectMemberOptionsController(memberDao);
+        Member member = MemberDaoTest.exampleMember();
+        memberDao.insert(member);
+
+        assertThat(controller.getBody())
+                .contains("<option value=" + member.getId() + ">" + member.getName() + "</option>");
     }
 
     public static Member exampleMember() {

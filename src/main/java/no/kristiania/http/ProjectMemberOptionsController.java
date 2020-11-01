@@ -29,11 +29,6 @@ public class ProjectMemberOptionsController implements HttpController {
     }
 
     public String getBody() throws SQLException {
-        String body = "";
-        for (Member member : memberDao.list()) {
-            body += "<option value=" + member.getId() + ">" + member.getName() + "</option>";
-        }
-
         return memberDao.list()
                 .stream().map(m -> "<option value=" + m.getId() + ">" + m.getName() + "</option>")
                 .collect(Collectors.joining());
