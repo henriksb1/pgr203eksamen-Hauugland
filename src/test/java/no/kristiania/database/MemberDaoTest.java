@@ -1,6 +1,9 @@
 package no.kristiania.database;
 
+import no.kristiania.http.HttpMessage;
+import no.kristiania.http.HttpServer;
 import no.kristiania.http.ProjectMemberOptionsController;
+import no.kristiania.http.UpdateMemberController;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +59,14 @@ public class MemberDaoTest {
 
         assertThat(controller.getBody())
                 .contains("<option value=" + member.getId() + ">" + member.getName() + "</option>");
+    }
+
+    @Test
+    void shouldUpdateExistingMemberWithNewTask() {
+        UpdateMemberController controller = new UpdateMemberController(memberDao);
+        HttpMessage httpMessage = new HttpMessage("HTTP/1.1 200 OK");
+        controller.handle(httpMessage.setBody("memberId=1&taskId=1"), null);
+
     }
 
     public static Member exampleMember() {

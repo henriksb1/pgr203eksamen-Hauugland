@@ -23,7 +23,7 @@ public class ProjectTaskOptionsController implements HttpController {
 
 
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
-        String body = "<option>A</option><option>B</option>";
+        String body = getBody();
         responseMessage.setBody(body);
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
