@@ -74,7 +74,7 @@ public class MemberDaoTest {
 
 
         String body = "memberId="+ member.getId() + "&taskId=" + task.getId();
-        controller.handle(body, null);
+        controller.handle(body);
 
         assertThat(memberDao.retrieve(member.getId()).getTaskId())
                 .isEqualTo(task.getId());

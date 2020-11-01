@@ -8,7 +8,7 @@ import java.util.Map;
 public class HttpMessage {
 
     private final String startLine;
-    private final Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();
     private String body;
 
 
@@ -97,6 +97,10 @@ public class HttpMessage {
             body.append((char) socket.getInputStream().read());
         }
         return body.toString();
+    }
+
+    public String getBody() {
+        return body;
     }
 }
 

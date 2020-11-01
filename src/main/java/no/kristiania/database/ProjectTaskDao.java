@@ -14,7 +14,7 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
         insert(task, "INSERT INTO project_tasks (task_name) values (?)");
     }
 
-    public ProjectTask retrieve(long id) throws SQLException {
+    public ProjectTask retrieve(Integer id) throws SQLException {
         return retrieve(id, "SELECT * FROM project_tasks WHERE id = ?");
     }
 
@@ -31,7 +31,7 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
     protected ProjectTask mapRow(ResultSet rs) throws SQLException {
         ProjectTask projectTask = new ProjectTask();
         projectTask.setName(rs.getString("task_name"));
-        projectTask.setId(rs.getLong("id"));
+        projectTask.setId(rs.getInt("id"));
         return projectTask;
     }
 }

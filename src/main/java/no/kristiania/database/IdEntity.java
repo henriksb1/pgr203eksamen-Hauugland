@@ -2,22 +2,22 @@ package no.kristiania.database;
 
 public class IdEntity {
 
-    private Long id;
-    private Long taskId;
+    private Integer id;
+    private Integer taskId;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getTaskId() {
+    public Integer getTaskId() {
         return taskId;
     }
 
-    public void setTaskId(Long taskId) {
+    public void setTaskId(Integer taskId) {
         this.taskId = taskId;
     }
 }

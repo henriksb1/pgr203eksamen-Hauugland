@@ -12,7 +12,7 @@ public abstract class AbstractDao<T extends IdEntity> {
         this.dataSource = dataSource;
     }
 
-    protected T retrieve(Long id, String sql) throws SQLException {
+    protected T retrieve(Integer id, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 statement.setLong(1, id);
@@ -61,9 +61,11 @@ public abstract class AbstractDao<T extends IdEntity> {
     public static void fillGeneratedKeys(IdEntity entity, PreparedStatement statement) throws SQLException {
         try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
             generatedKeys.next();
-            entity.setId(generatedKeys.getLong("id"));
+            entity.setId(generatedKeys.getInt("id"));
         }
     }
 
     protected abstract T mapRow(ResultSet rs) throws SQLException;
+
+
 }

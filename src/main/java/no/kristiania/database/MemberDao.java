@@ -16,7 +16,7 @@ public class MemberDao extends AbstractDao<Member> {
     }
 
 
-    public Member retrieve(Long id) throws SQLException {
+    public Member retrieve(Integer id) throws SQLException {
         return retrieve(id, "SELECT * FROM members WHERE id = ?");
     }
 
@@ -30,12 +30,28 @@ public class MemberDao extends AbstractDao<Member> {
         statement.executeUpdate();
     }
 
+
     @Override
     protected Member mapRow(ResultSet rs) throws SQLException {
         Member member = new Member();
-        member.setId(rs.getLong("id"));
+        member.setId(rs.getInt("id"));
+        member.setTaskId((Integer) rs.getObject("taskId"));
         member.setName(rs.getString("member_name"));
         member.setEmail(rs.getString("email"));
         return member;
+    }
+
+    public void update(Member member) throws SQLException {
+        try (Connection connection = dataSource.getConnection()){
+            try(PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE members SET taskId = ? WHERE id = ?"
+
+            )){
+                statement.setInt(1, member.getTaskId());
+                statement.setInt(2, member.getId());
+                statement.executeUpdate();
+
+            }
+        }
     }
 }
