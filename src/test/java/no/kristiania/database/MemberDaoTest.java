@@ -1,7 +1,5 @@
 package no.kristiania.database;
 
-import no.kristiania.http.HttpMessage;
-import no.kristiania.http.HttpServer;
 import no.kristiania.http.ProjectMemberOptionsController;
 import no.kristiania.http.UpdateMemberController;
 import org.flywaydb.core.Flyway;
@@ -9,7 +7,8 @@ import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Connection;
+
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Random;
 
@@ -19,6 +18,7 @@ public class MemberDaoTest {
 
     private MemberDao memberDao;
     private static final Random random = new Random();
+    private ProjectTaskDao taskDao;
 
     @BeforeEach
     void setUp() {
@@ -26,6 +26,7 @@ public class MemberDaoTest {
         dataSource.setUrl("jdbc:h2:mem:testdatabase;DB_CLOSE_DELAY=-1");
         Flyway.configure().dataSource(dataSource).load().migrate();
         memberDao = new MemberDao(dataSource);
+        taskDao = new ProjectTaskDao(dataSource);
     }
 
     @Test
@@ -45,7 +46,7 @@ public class MemberDaoTest {
         memberDao.insert(exampleMember());
         Member member = exampleMember();
         memberDao.insert(member);
-        assertThat(member).hasNoNullFieldsOrProperties();
+        assertThat(member).hasNoNullFieldsOrPropertiesExcept("taskId");
         assertThat(memberDao.retrieve(member.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(member);
@@ -62,10 +63,22 @@ public class MemberDaoTest {
     }
 
     @Test
-    void shouldUpdateExistingMemberWithNewTask() {
+    void shouldUpdateExistingMemberWithNewTask() throws IOException, SQLException {
         UpdateMemberController controller = new UpdateMemberController(memberDao);
-        HttpMessage httpMessage = new HttpMessage("HTTP/1.1 200 OK");
-        controller.handle(httpMessage.setBody("memberId=1&taskId=1"), null);
+
+        Member member = exampleMember();
+        memberDao.insert(member);
+
+        ProjectTask task = ProjectTaskDaoTest.exampleTask();
+        taskDao.insert(task);
+
+
+        String body = "memberId="+ member.getId() + "&taskId=" + task.getId();
+        controller.handle(body, null);
+
+        assertThat(memberDao.retrieve(member.getId()).getTaskId())
+                .isEqualTo(task.getId());
+
 
     }
 

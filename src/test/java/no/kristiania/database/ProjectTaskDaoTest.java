@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ProjectTaskDaoTest {
 
     private ProjectTaskDao projectTaskDao;
-    private final Random random = new Random();
+    private static final Random random = new Random();
 
     @BeforeEach
     void setUp() {
@@ -36,13 +36,13 @@ public class ProjectTaskDaoTest {
                 .contains(projectTask1.getName(), projectTask2.getName());
     }
 
-    private ProjectTask exampleTask() {
+    public static ProjectTask exampleTask() {
         ProjectTask task = new ProjectTask();
         task.setName(exampleTaskName());
         return task;
     }
 
-    private String exampleTaskName() {
+    private static String exampleTaskName() {
         String[] names = {"Vaske Tak", "Opprydding", "Maling av tak", "Salg"};
         return names[random.nextInt(names.length)];
     }
@@ -53,7 +53,7 @@ public class ProjectTaskDaoTest {
         projectTaskDao.insert(exampleTask());
         ProjectTask task = exampleTask();
         projectTaskDao.insert(task);
-        assertThat(task).hasNoNullFieldsOrProperties();
+        assertThat(task).hasNoNullFieldsOrPropertiesExcept("taskId");
         assertThat(projectTaskDao.retrieve(task.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(task);

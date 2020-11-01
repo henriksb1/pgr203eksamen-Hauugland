@@ -11,9 +11,11 @@ public class HttpMessage {
     private final Map<String, String> headers = new HashMap<>();
     private String body;
 
+
     public HttpMessage(String startLine){
         this.startLine = startLine;
     }
+
 
     public static String readLine(Socket socket) throws IOException {
         StringBuilder line = new StringBuilder();
