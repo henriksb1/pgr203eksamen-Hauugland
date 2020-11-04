@@ -1,4 +1,6 @@
-package no.kristiania.database;
+package no.kristiania.dao;
+
+import no.kristiania.database.Status;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;

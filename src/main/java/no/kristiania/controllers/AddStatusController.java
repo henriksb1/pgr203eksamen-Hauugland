@@ -1,18 +1,20 @@
-package no.kristiania.http;
+package no.kristiania.controllers;
 
-import no.kristiania.database.ProjectTask;
-import no.kristiania.database.ProjectTaskDao;
+import no.kristiania.database.Status;
+import no.kristiania.dao.StatusDao;
+import no.kristiania.http.HttpMessage;
+import no.kristiania.http.QueryString;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
 
-public class ProjectTaskPostController implements HttpController {
-    private ProjectTaskDao projectTaskDao;
+public class AddStatusController implements HttpController{
 
-    public ProjectTaskPostController(ProjectTaskDao projectTaskDao) {
+    private final StatusDao statusDao;
 
-        this.projectTaskDao = projectTaskDao;
+    public AddStatusController(StatusDao statusDao) {
+        this.statusDao = statusDao;
     }
 
     @Override
@@ -23,17 +25,14 @@ public class ProjectTaskPostController implements HttpController {
         String body = HttpMessage.readBody(clientSocket, requestMessage.getHeader("Content-Length"));
 
         QueryString requestForm = new QueryString(body);
-        ProjectTask projectTask = new ProjectTask();
-        projectTask.setName(requestForm.getParameter("task_name"));
-        projectTask.setStatusId(Integer.valueOf(requestForm.getParameter("statusId")));
-
-        projectTaskDao.insert(projectTask);
+        Status status = new Status();
+        status.setName(requestForm.getParameter("status_name"));
+        statusDao.insert(status);
 
 
         HttpMessage responseMessage = new HttpMessage("HTTP/1.1 302 Redirect");
         responseMessage.setHeader("Location", "http://localhost:8080/index.html");
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
-
     }
 }

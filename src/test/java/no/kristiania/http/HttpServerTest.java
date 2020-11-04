@@ -1,7 +1,7 @@
 package no.kristiania.http;
 
 import no.kristiania.database.Member;
-import no.kristiania.database.MemberDao;
+import no.kristiania.dao.MemberDao;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;

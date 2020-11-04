@@ -1,7 +1,8 @@
-package no.kristiania.http;
+package no.kristiania.controllers;
 
 import no.kristiania.database.ProjectTask;
-import no.kristiania.database.ProjectTaskDao;
+import no.kristiania.dao.ProjectTaskDao;
+import no.kristiania.http.HttpMessage;
 
 import java.io.IOException;
 import java.net.Socket;

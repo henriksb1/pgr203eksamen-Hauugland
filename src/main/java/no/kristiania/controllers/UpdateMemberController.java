@@ -1,18 +1,19 @@
-package no.kristiania.http;
+package no.kristiania.controllers;
 
 import no.kristiania.database.Member;
-import no.kristiania.database.ProjectTask;
-import no.kristiania.database.ProjectTaskDao;
+import no.kristiania.dao.MemberDao;
+import no.kristiania.http.HttpMessage;
+import no.kristiania.http.QueryString;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
 
-public class UpdateTaskController implements HttpController {
-    private ProjectTaskDao projectTaskDao;
+public class UpdateMemberController  implements HttpController{
+    private MemberDao memberDao;
 
-    public UpdateTaskController(ProjectTaskDao projectTaskDao) {
-        this.projectTaskDao = projectTaskDao;
+    public UpdateMemberController(MemberDao memberDao) {
+        this.memberDao = memberDao;
     }
 
     @Override
@@ -28,14 +29,16 @@ public class UpdateTaskController implements HttpController {
     }
 
     public HttpMessage handle(QueryString requestParameter) throws SQLException {
+        Integer memberId = Integer.valueOf(requestParameter.getParameter("memberId"));
         Integer taskId = Integer.valueOf(requestParameter.getParameter("taskId"));
-        Integer statusId = Integer.valueOf(requestParameter.getParameter("status"));
-        ProjectTask task = projectTaskDao.retrieve(taskId);
-        task.setStatusId(statusId);
+        Member member = memberDao.retrieve(memberId);
+        member.setTaskId(taskId);
 
-        projectTaskDao.update(task);
+        memberDao.update(member);
 
-        HttpMessage redirect = new HttpMessage("HTTP/1.1 200 OK");
+        HttpMessage redirect = new HttpMessage("HTTP/1.1 302 Redirect");
+        redirect.setHeader("Location", "http://localhost:8080/index.html");
         return redirect;
     }
+
 }

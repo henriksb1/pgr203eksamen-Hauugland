@@ -30,7 +30,7 @@ public class HttpMessage {
         return line.toString();
     }
 
-    static String readBody(Socket socket, String contentLengthHeader) throws IOException {
+    public static String readBody(Socket socket, String contentLengthHeader) throws IOException {
         int contentLength = Integer.parseInt(contentLengthHeader);
         StringBuilder body = new StringBuilder();
         for (int i = 0; i < contentLength; i++) {

@@ -1,19 +1,18 @@
-package no.kristiania.http;
+package no.kristiania.controllers;
 
-import no.kristiania.database.Member;
-import no.kristiania.database.ProjectTask;
-import no.kristiania.database.ProjectTaskDao;
+import no.kristiania.dao.MemberDao;
+import no.kristiania.http.HttpMessage;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
-public class ProjectTaskOptionsController implements HttpController {
-    private ProjectTaskDao projectTaskDao;
+public class ProjectMemberOptionsController implements HttpController {
+    private MemberDao memberDao;
 
-    public ProjectTaskOptionsController(ProjectTaskDao projectTaskDao) {
-        this.projectTaskDao = projectTaskDao;
+    public ProjectMemberOptionsController(MemberDao memberDao) {
+        this.memberDao = memberDao;
     }
 
     @Override
@@ -29,7 +28,7 @@ public class ProjectTaskOptionsController implements HttpController {
     }
 
     public String getBody() throws SQLException {
-        return projectTaskDao.list()
+        return memberDao.list()
                 .stream().map(m -> "<option value=" + m.getId() + ">" + m.getName() + "</option>")
                 .collect(Collectors.joining());
     }

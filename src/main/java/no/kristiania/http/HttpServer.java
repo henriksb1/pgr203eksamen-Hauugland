@@ -1,5 +1,9 @@
 package no.kristiania.http;
 
+import no.kristiania.controllers.*;
+import no.kristiania.dao.MemberDao;
+import no.kristiania.dao.ProjectTaskDao;
+import no.kristiania.dao.StatusDao;
 import no.kristiania.database.*;
 import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
