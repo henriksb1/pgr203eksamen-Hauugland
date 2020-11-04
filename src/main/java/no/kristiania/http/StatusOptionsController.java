@@ -1,20 +1,22 @@
 package no.kristiania.http;
 
-import no.kristiania.database.Member;
-import no.kristiania.database.ProjectTask;
+import no.kristiania.database.MemberDao;
 import no.kristiania.database.ProjectTaskDao;
+import no.kristiania.database.Status;
+import no.kristiania.database.StatusDao;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
-public class ProjectTaskOptionsController implements HttpController {
-    private ProjectTaskDao projectTaskDao;
+public class StatusOptionsController implements HttpController {
+    private StatusDao statusDao;
 
-    public ProjectTaskOptionsController(ProjectTaskDao projectTaskDao) {
-        this.projectTaskDao = projectTaskDao;
+    public StatusOptionsController(StatusDao statusDao) {
+           this.statusDao = statusDao;
     }
+
 
     @Override
     public void handle(String requestLine, Socket clientSocket) throws IOException, SQLException {
@@ -27,9 +29,8 @@ public class ProjectTaskOptionsController implements HttpController {
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.write(clientSocket);
     }
-
     public String getBody() throws SQLException {
-        return projectTaskDao.list()
+        return statusDao.list()
                 .stream().map(m -> "<option value=" + m.getId() + ">" + m.getName() + "</option>")
                 .collect(Collectors.joining());
     }

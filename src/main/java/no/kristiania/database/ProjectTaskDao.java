@@ -34,4 +34,18 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
         projectTask.setId(rs.getInt("id"));
         return projectTask;
     }
+
+    public void update(ProjectTask projectTask) throws SQLException {
+        try (Connection connection = dataSource.getConnection()){
+            try(PreparedStatement statement = connection.prepareStatement(
+                    "UPDATE project_tasks SET statusId = ? WHERE id = ?"
+
+            )){
+                statement.setInt(1, projectTask.getStatusId());
+                statement.setInt(2, projectTask.getId());
+                statement.executeUpdate();
+
+            }
+        }
+    }
 }

@@ -4,6 +4,7 @@ public class IdEntity {
 
     private Integer id;
     private Integer taskId;
+    private Integer statusId;
 
     public Integer getId() {
         return id;
@@ -19,5 +20,13 @@ public class IdEntity {
 
     public void setTaskId(Integer taskId) {
         this.taskId = taskId;
+    }
+
+    public Integer getStatusId() {
+        return statusId;
+    }
+
+    public void setStatusId(Integer statusId) {
+        this.statusId = statusId;
     }
 }

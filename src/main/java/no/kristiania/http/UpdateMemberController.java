@@ -17,14 +17,17 @@ public class UpdateMemberController  implements HttpController{
 
     @Override
     public void handle(String requestLine, Socket clientSocket) throws IOException, SQLException {
-        HttpMessage response = handle(requestLine);
-        response.write(clientSocket);
+        HttpMessage requestMessage = new HttpMessage(requestLine);
+        requestMessage.readHeaders(clientSocket);
 
+        String body = HttpMessage.readBody(clientSocket, requestMessage.getHeader("Content-Length"));
+
+        QueryString requestForm = new QueryString(body);
+        HttpMessage response = handle(requestForm);
+        response.write(clientSocket);
     }
 
-    public HttpMessage handle(String requestLine) throws SQLException {
-        QueryString requestParameter = new QueryString(requestLine);
-
+    public HttpMessage handle(QueryString requestParameter) throws SQLException {
         Integer memberId = Integer.valueOf(requestParameter.getParameter("memberId"));
         Integer taskId = Integer.valueOf(requestParameter.getParameter("taskId"));
         Member member = memberDao.retrieve(memberId);

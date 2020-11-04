@@ -1,6 +1,7 @@
 package no.kristiania.database;
 
 import no.kristiania.http.ProjectMemberOptionsController;
+import no.kristiania.http.QueryString;
 import no.kristiania.http.UpdateMemberController;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcDataSource;
@@ -74,7 +75,7 @@ public class MemberDaoTest {
 
 
         String body = "memberId="+ member.getId() + "&taskId=" + task.getId();
-        controller.handle(body);
+        controller.handle(new QueryString(body));
 
         assertThat(memberDao.retrieve(member.getId()).getTaskId())
                 .isEqualTo(task.getId());

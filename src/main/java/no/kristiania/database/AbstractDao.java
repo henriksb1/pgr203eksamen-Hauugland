@@ -67,5 +67,4 @@ public abstract class AbstractDao<T extends IdEntity> {
 
     protected abstract T mapRow(ResultSet rs) throws SQLException;
 
-
 }
