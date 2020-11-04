@@ -11,7 +11,7 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
     }
 
     public void insert(ProjectTask task) throws SQLException {
-        insert(task, "INSERT INTO project_tasks (task_name) values (?)");
+        insert(task, "INSERT INTO project_tasks (task_name, statusId) values (?, ?)");
     }
 
     public ProjectTask retrieve(Integer id) throws SQLException {
@@ -24,6 +24,7 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
 
     protected void mapEntityToPreparedStatement(PreparedStatement statement, ProjectTask entity) throws SQLException{
         statement.setString(1, entity.getName());
+        statement.setInt(2, entity.getStatusId());
         statement.executeUpdate();
     }
 
@@ -32,6 +33,7 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
         ProjectTask projectTask = new ProjectTask();
         projectTask.setName(rs.getString("task_name"));
         projectTask.setId(rs.getInt("id"));
+        projectTask.setStatusId(rs.getInt("statusId"));
         return projectTask;
     }
 

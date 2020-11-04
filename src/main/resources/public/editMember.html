@@ -8,7 +8,6 @@
     <form method="post" action="/updateMember">
         <p>Member: <select name="memberId" id="memberId"></select> </p>
         <p>New Task: <select name="taskId" id="taskId"></select> </p>
-        <p>With Status: <select name="statusId" id="statusId"></select></p>
         <input type="submit" value="Submit">
     </form>
 
@@ -25,13 +24,6 @@
             return response.text();
         }).then(function(text) {
         document.getElementById("taskId").innerHTML = text;
-    });
-
-    fetch("/statusOptions")
-        .then(function(response) {
-            return response.text();
-        }).then(function(text) {
-        document.getElementById("statusId").innerHTML = text;
     });
 
 </script>
