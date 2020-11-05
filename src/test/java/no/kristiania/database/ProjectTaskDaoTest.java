@@ -39,6 +39,7 @@ public class ProjectTaskDaoTest {
     public static ProjectTask exampleTask() {
         ProjectTask task = new ProjectTask();
         task.setName(exampleTaskName());
+        task.setStatusId(1);
         return task;
     }
 
@@ -64,6 +65,7 @@ public class ProjectTaskDaoTest {
     void shouldReturnTasksAsOptions() throws SQLException {
         ProjectTaskOptionsController controller = new ProjectTaskOptionsController(projectTaskDao);
         ProjectTask projectTask = new ProjectTask();
+        projectTask.setStatusId(1);
         projectTaskDao.insert(projectTask);
 
         assertThat(controller.getBody())

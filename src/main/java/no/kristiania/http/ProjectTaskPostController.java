@@ -26,6 +26,7 @@ public class ProjectTaskPostController implements HttpController {
         ProjectTask projectTask = new ProjectTask();
         projectTask.setName(requestForm.getParameter("task_name"));
         projectTask.setStatusId(Integer.valueOf(requestForm.getParameter("statusId")));
+
         projectTaskDao.insert(projectTask);
 
 

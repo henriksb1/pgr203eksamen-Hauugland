@@ -105,7 +105,7 @@ class HttpServerTest {
     void shouldPostNewTask() throws IOException {
         QueryString task = new QueryString("");
         task.addParameter("task_name", "Male");
-        task.addParameter("color", "black");
+        task.addParameter("statusId", "1");
         HttpClient postClient = new HttpClient("localhost", server.getPort(), "/newProjectTasks", "POST", task);
         assertEquals(302, postClient.getResponseCode());
 

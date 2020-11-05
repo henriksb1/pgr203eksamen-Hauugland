@@ -47,7 +47,7 @@ public class MemberDaoTest {
         memberDao.insert(exampleMember());
         Member member = exampleMember();
         memberDao.insert(member);
-        assertThat(member).hasNoNullFieldsOrPropertiesExcept("taskId");
+        assertThat(member).hasNoNullFieldsOrPropertiesExcept("taskId", "statusId");
         assertThat(memberDao.retrieve(member.getId()))
                 .usingRecursiveComparison()
                 .isEqualTo(member);
@@ -71,6 +71,7 @@ public class MemberDaoTest {
         memberDao.insert(member);
 
         ProjectTask task = ProjectTaskDaoTest.exampleTask();
+        task.setStatusId(1);
         taskDao.insert(task);
 
 
