@@ -39,7 +39,7 @@ public class HttpServer {
         ProjectTaskDao projectTaskDao = new ProjectTaskDao(dataSource);
         controllers = Map.of(
                 "/newProjectTasks", new ProjectTaskPostController(projectTaskDao),
-                "/projectTasks", new ProjectTaskGetController(projectTaskDao),
+                "/projectTasks", new ProjectTaskGetController(projectTaskDao, memberDao, statusDao),
                 "/taskOptions", new ProjectTaskOptionsController(projectTaskDao),
                 "/memberOptions", new ProjectMemberOptionsController(memberDao),
                 "/updateMember", new UpdateMemberController(memberDao),
@@ -93,7 +93,7 @@ public class HttpServer {
         String requestTarget = requestLine.split(" ")[1];
         int questionPos = requestTarget.indexOf('?');
 
-        String taskId = questionPos != -1 ? requestTarget.substring(questionPos) : null;
+        String taskId = questionPos != -1 ? requestTarget.substring(questionPos+1) : null;
         String requestPath = questionPos != -1 ? requestTarget.substring(0, questionPos) : requestTarget;
 
         // GJØRE OM DISSE TIL CONTROLLERS
@@ -170,7 +170,7 @@ public class HttpServer {
     private void handleGetMembersByTask(Socket clientSocket, String requestTarget, String taskId) throws SQLException, IOException {
         StringBuilder body = new StringBuilder("<ul>");
         QueryString taskParameters = new QueryString(taskId);
-        int parameter = Integer.parseInt(taskParameters.getParameter("?taskId"));
+        int parameter = Integer.parseInt(taskParameters.getParameter("taskId"));
         for(Member member : memberDao.list()){
             if(member.getTaskId() == null){
                 continue;
@@ -190,7 +190,7 @@ public class HttpServer {
     private void handleGetTasksByStatus(Socket clientSocket, String requestTarget, String statusId) throws SQLException, IOException {
         StringBuilder body = new StringBuilder("<ul>");
         QueryString taskParameters = new QueryString(statusId);
-        int parameter = Integer.parseInt(taskParameters.getParameter("?statusId"));
+        int parameter = Integer.parseInt(taskParameters.getParameter("statusId"));
         for(ProjectTask task : projectTaskDao.list()){
             if(task.getStatusId() == null){
                 continue;
