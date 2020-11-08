@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Properties;
 
 
+
 public class HttpServer {
     private final List<String> memberNames = new ArrayList<>();
     private final MemberDao memberDao;
@@ -95,6 +96,7 @@ public class HttpServer {
         String taskId = questionPos != -1 ? requestTarget.substring(questionPos) : null;
         String requestPath = questionPos != -1 ? requestTarget.substring(0, questionPos) : requestTarget;
 
+        // GJØRE OM DISSE TIL CONTROLLERS
         if(requestMethod.equals("POST")){
             if(requestPath.equals("/members")){
                 handlePostMember(clientSocket, requestLine);
