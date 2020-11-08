@@ -44,6 +44,21 @@ public abstract class AbstractDao<T extends IdEntity> {
         return list;
     }
 
+    public List<T> list(Integer id,String sql) throws SQLException {
+        List<T>  list = new ArrayList<>();
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.setLong(1, id);
+                try (ResultSet rs = statement.executeQuery()) {
+                    while (rs.next()) {
+                        list.add(mapRow(rs));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
     public void insert(T entity, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection()){
             try(PreparedStatement statement = connection.prepareStatement(
@@ -56,6 +71,7 @@ public abstract class AbstractDao<T extends IdEntity> {
             }
         }
     }
+
 
 
     protected abstract void mapEntityToPreparedStatement(PreparedStatement statement, T entity) throws SQLException;

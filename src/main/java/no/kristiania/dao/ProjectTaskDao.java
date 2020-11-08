@@ -23,6 +23,9 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
     public List<ProjectTask> list() throws SQLException {
         return list("SELECT * FROM project_tasks");
     }
+    public List<ProjectTask> list(Integer id) throws SQLException {
+        return list(id, "SELECT * FROM project_tasks WHERE id IN (SELECT task_id FROM members_to_tasks WHERE member_id = ?)");
+    }
 
     protected void mapEntityToPreparedStatement(PreparedStatement statement, ProjectTask entity) throws SQLException{
         statement.setString(1, entity.getName());

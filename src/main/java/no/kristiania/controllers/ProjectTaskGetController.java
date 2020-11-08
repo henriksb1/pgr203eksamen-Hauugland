@@ -35,10 +35,8 @@ public class ProjectTaskGetController implements HttpController {
                 }
             }
             body.append("<li>").append(task.getName() + " (Status: <strong>" + statusName + "</strong>) - <i>Members on task:</i>" ).append("<ul>");
-            for(Member member : memberDao.list()){
-                if(member.getTaskId() == task.getId()) {
+            for(Member member : memberDao.list(task.getId())){
                     body.append("<li>").append(member.getName()).append("</li>");
-                }
             }
 
             body.append("</ul>").append("</li>");

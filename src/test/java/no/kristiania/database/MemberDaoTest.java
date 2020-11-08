@@ -3,15 +3,12 @@ package no.kristiania.database;
 import no.kristiania.controllers.ProjectMemberOptionsController;
 import no.kristiania.dao.MemberDao;
 import no.kristiania.dao.ProjectTaskDao;
-import no.kristiania.http.QueryString;
-import no.kristiania.controllers.UpdateMemberController;
 import org.flywaydb.core.Flyway;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Random;
 
@@ -65,7 +62,7 @@ public class MemberDaoTest {
                 .contains("<option value=" + member.getId() + ">" + member.getName() + "</option>");
     }
 
-    @Test
+    /*@Test
     void shouldUpdateExistingMemberWithNewTask() throws IOException, SQLException {
         UpdateMemberController controller = new UpdateMemberController(memberDao);
 
@@ -84,7 +81,7 @@ public class MemberDaoTest {
                 .isEqualTo(task.getId());
 
 
-    }
+    }*/
 
     public static Member exampleMember() {
         Member member = new Member();

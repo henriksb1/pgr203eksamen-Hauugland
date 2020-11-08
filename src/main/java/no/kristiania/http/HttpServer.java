@@ -2,6 +2,7 @@ package no.kristiania.http;
 
 import no.kristiania.controllers.*;
 import no.kristiania.dao.MemberDao;
+import no.kristiania.dao.MemberToTaskDao;
 import no.kristiania.dao.ProjectTaskDao;
 import no.kristiania.dao.StatusDao;
 import no.kristiania.database.*;
@@ -31,18 +32,20 @@ public class HttpServer {
     private final Map<String, HttpController> controllers;
     private final ServerSocket serverSocket;
     private final StatusDao statusDao;
+    private final MemberToTaskDao memberToTaskDao;
 
     public HttpServer(int port, DataSource dataSource) throws IOException {
         memberDao = new MemberDao(dataSource);
         statusDao = new StatusDao(dataSource);
         projectTaskDao = new ProjectTaskDao(dataSource);
+        memberToTaskDao = new MemberToTaskDao(dataSource);
         ProjectTaskDao projectTaskDao = new ProjectTaskDao(dataSource);
         controllers = Map.of(
                 "/newProjectTasks", new ProjectTaskPostController(projectTaskDao),
                 "/projectTasks", new ProjectTaskGetController(projectTaskDao, memberDao, statusDao),
                 "/taskOptions", new ProjectTaskOptionsController(projectTaskDao),
                 "/memberOptions", new ProjectMemberOptionsController(memberDao),
-                "/updateMember", new UpdateMemberController(memberDao),
+                "/addTaskToMember", new AddTaskToMemberController(memberToTaskDao),
                 "/status", new AddStatusController(statusDao),
                 "/statusOptions", new StatusOptionsController(statusDao),
                 "/updateTask", new UpdateTaskController(projectTaskDao)
@@ -150,7 +153,11 @@ public class HttpServer {
     private void handleGetMembers(Socket clientSocket, String requestTarget) throws SQLException, IOException {
         StringBuilder body = new StringBuilder("<ul>");
         for(Member member : memberDao.list()){
-            body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li>");
+            body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li><ul>");
+            for(ProjectTask projectTask : projectTaskDao.list(member.getId())){
+                body.append("<li>" + projectTask.getName() + "</li>");
+            }
+            body.append("</ul>");
         }
         body.append("</ul>");
 
@@ -171,12 +178,9 @@ public class HttpServer {
         StringBuilder body = new StringBuilder("<ul>");
         QueryString taskParameters = new QueryString(taskId);
         int parameter = Integer.parseInt(taskParameters.getParameter("taskId"));
-        for(Member member : memberDao.list()){
-            if(member.getTaskId() == null){
-                continue;
-            }else if(parameter == member.getTaskId()){
-                body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li>");
-            }
+
+        for(Member member : memberDao.list(parameter)){
+            body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li>");
         }
         body.append("</ul>");
 
