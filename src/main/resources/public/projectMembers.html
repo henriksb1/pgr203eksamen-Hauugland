@@ -8,6 +8,14 @@
 <body>
     <h1>These are all the project members:</h1>
     <div id="projectMembers"></div>
+
+    <h2>Filter members by task:</h2>
+    <form>
+        <select name="taskId" id="taskId"></select>
+        <button>Submit</button>
+    </form>
+    <div id="filterMembers"></div>
+
     <a href="index.html">Back to frontpage</a>
 </body>
 <script>
@@ -16,6 +24,18 @@
             return response.text();
         }).then(function(text) {
         document.getElementById("projectMembers").innerHTML = text;
+    });
+    fetch("/taskOptions")
+        .then(function(response) {
+            return response.text();
+        }).then(function(text) {
+        document.getElementById("taskId").innerHTML = text;
+    });
+    fetch("/projectMembersByTask" + location.search)
+        .then(function(response) {
+            return response.text();
+        }).then(function(text) {
+        document.getElementById("filterMembers").innerHTML = text;
     });
 </script>
 </html>

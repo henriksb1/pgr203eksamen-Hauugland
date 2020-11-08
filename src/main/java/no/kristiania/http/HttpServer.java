@@ -1,8 +1,10 @@
 package no.kristiania.http;
 
-import no.kristiania.database.Member;
-import no.kristiania.database.MemberDao;
-import no.kristiania.database.ProjectTaskDao;
+import no.kristiania.controllers.*;
+import no.kristiania.dao.MemberDao;
+import no.kristiania.dao.ProjectTaskDao;
+import no.kristiania.dao.StatusDao;
+import no.kristiania.database.*;
 import org.flywaydb.core.Flyway;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.slf4j.Logger;
@@ -20,22 +22,33 @@ import java.util.Map;
 import java.util.Properties;
 
 
+
 public class HttpServer {
     private final List<String> memberNames = new ArrayList<>();
     private final MemberDao memberDao;
+    private final ProjectTaskDao projectTaskDao;
     private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
     private final Map<String, HttpController> controllers;
+    private final ServerSocket serverSocket;
+    private final StatusDao statusDao;
 
     public HttpServer(int port, DataSource dataSource) throws IOException {
-
         memberDao = new MemberDao(dataSource);
+        statusDao = new StatusDao(dataSource);
+        projectTaskDao = new ProjectTaskDao(dataSource);
         ProjectTaskDao projectTaskDao = new ProjectTaskDao(dataSource);
         controllers = Map.of(
                 "/newProjectTasks", new ProjectTaskPostController(projectTaskDao),
-                "/projectTasks", new ProjectTaskGetController(projectTaskDao)
+                "/projectTasks", new ProjectTaskGetController(projectTaskDao, memberDao, statusDao),
+                "/taskOptions", new ProjectTaskOptionsController(projectTaskDao),
+                "/memberOptions", new ProjectMemberOptionsController(memberDao),
+                "/updateMember", new UpdateMemberController(memberDao),
+                "/status", new AddStatusController(statusDao),
+                "/statusOptions", new StatusOptionsController(statusDao),
+                "/updateTask", new UpdateTaskController(projectTaskDao)
         );
 
-        ServerSocket serverSocket = new ServerSocket(port);
+        serverSocket = new ServerSocket(port);
 
         new Thread(() ->{
             while(true) {
@@ -48,6 +61,10 @@ public class HttpServer {
             }
         }).start();
 
+    }
+
+    public int getPort() {
+        return serverSocket.getLocalPort();
     }
 
     public static void main(String[] args) throws IOException {
@@ -64,8 +81,8 @@ public class HttpServer {
 
         HttpServer server = new HttpServer(8080, dataSource);
 
+        logger.info("using database {}", dataSource.getUrl());
         logger.info("Started on {}", "http://localhost:8080/");
-
     }
 
     private void handleRequest(Socket clientSocket) throws IOException, SQLException {
@@ -75,8 +92,11 @@ public class HttpServer {
         String requestMethod = requestLine.split(" ")[0];
         String requestTarget = requestLine.split(" ")[1];
         int questionPos = requestTarget.indexOf('?');
+
+        String taskId = questionPos != -1 ? requestTarget.substring(questionPos+1) : null;
         String requestPath = questionPos != -1 ? requestTarget.substring(0, questionPos) : requestTarget;
 
+        // GJØRE OM DISSE TIL CONTROLLERS
         if(requestMethod.equals("POST")){
             if(requestPath.equals("/members")){
                 handlePostMember(clientSocket, requestLine);
@@ -89,14 +109,18 @@ public class HttpServer {
 
             }else if(requestPath.equals("/projectMembers") || requestPath.equals("/")){
                 handleGetMembers(clientSocket, requestTarget);
+            }else if(requestPath.equals("/projectMembersByTask")){
+                handleGetMembersByTask(clientSocket, requestTarget, taskId);
+            }else if(requestPath.equals("/taskByStatus")){
+                handleGetTasksByStatus(clientSocket, requestTarget, taskId);
             }else{
                 HttpController controller = controllers.get(requestPath);
-
                 if(controller != null ){
                     controller.handle(requestLine, clientSocket);
+                }else{
+                    handleFileRequest(clientSocket, requestPath);
                 }
 
-                handleFileRequest(clientSocket, requestPath);
             }
         }
     }
@@ -141,8 +165,46 @@ public class HttpServer {
         responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
         responseMessage.setBody(body.toString());
         responseMessage.write(clientSocket);
+    }
 
+    private void handleGetMembersByTask(Socket clientSocket, String requestTarget, String taskId) throws SQLException, IOException {
+        StringBuilder body = new StringBuilder("<ul>");
+        QueryString taskParameters = new QueryString(taskId);
+        int parameter = Integer.parseInt(taskParameters.getParameter("taskId"));
+        for(Member member : memberDao.list()){
+            if(member.getTaskId() == null){
+                continue;
+            }else if(parameter == member.getTaskId()){
+                body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li>");
+            }
+        }
+        body.append("</ul>");
 
+        HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+        responseMessage.setHeader("Content-Type", "text/html");
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+        responseMessage.setBody(body.toString());
+        responseMessage.write(clientSocket);
+    }
+
+    private void handleGetTasksByStatus(Socket clientSocket, String requestTarget, String statusId) throws SQLException, IOException {
+        StringBuilder body = new StringBuilder("<ul>");
+        QueryString taskParameters = new QueryString(statusId);
+        int parameter = Integer.parseInt(taskParameters.getParameter("statusId"));
+        for(ProjectTask task : projectTaskDao.list()){
+            if(task.getStatusId() == null){
+                continue;
+            }else if(parameter == task.getStatusId()){
+                body.append("<li>").append(task.getName()).append(" </li>");
+            }
+        }
+        body.append("</ul>");
+
+        HttpMessage responseMessage = new HttpMessage("HTTP/1.1 200 OK");
+        responseMessage.setHeader("Content-Type", "text/html");
+        responseMessage.setHeader("Content-Length", String.valueOf(body.length()));
+        responseMessage.setBody(body.toString());
+        responseMessage.write(clientSocket);
     }
 
     private HttpController getController(String requestTarget) {

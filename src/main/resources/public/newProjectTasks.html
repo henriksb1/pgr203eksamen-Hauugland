@@ -11,7 +11,7 @@
 
     <form method="POST" action="/newProjectTasks">
         <div><label>Task name: <input type="text" name="task_name" /></label></div>
-        <div><label>Display color: <input type="color" name="color" /></label></div>
+        <div><select name="statusId" id="statusId"></select></p></div>
         <button>Add</button>
     </form>
 
@@ -21,4 +21,12 @@
 </div>
 
 </body>
+<script>
+    fetch("/statusOptions")
+        .then(function(response) {
+            return response.text();
+        }).then(function(text) {
+        document.getElementById("statusId").innerHTML = text;
+    });
+</script>
 </html>

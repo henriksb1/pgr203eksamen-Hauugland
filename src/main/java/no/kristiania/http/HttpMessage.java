@@ -8,12 +8,14 @@ import java.util.Map;
 public class HttpMessage {
 
     private final String startLine;
-    private final Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers = new HashMap<>();
     private String body;
+
 
     public HttpMessage(String startLine){
         this.startLine = startLine;
     }
+
 
     public static String readLine(Socket socket) throws IOException {
         StringBuilder line = new StringBuilder();
@@ -28,7 +30,7 @@ public class HttpMessage {
         return line.toString();
     }
 
-    static String readBody(Socket socket, String contentLengthHeader) throws IOException {
+    public static String readBody(Socket socket, String contentLengthHeader) throws IOException {
         int contentLength = Integer.parseInt(contentLengthHeader);
         StringBuilder body = new StringBuilder();
         for (int i = 0; i < contentLength; i++) {
@@ -95,6 +97,10 @@ public class HttpMessage {
             body.append((char) socket.getInputStream().read());
         }
         return body.toString();
+    }
+
+    public String getBody() {
+        return body;
     }
 }
 
