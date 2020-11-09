@@ -19,7 +19,7 @@ Eksempel:
 ```
 
 ## Designet på løsningen
-![](UMLDiagram.png)
+![]()
 
 ## Ekstra leveranse utover minimumskravene
 - [x] Håndtering av request target "/"
