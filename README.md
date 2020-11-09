@@ -38,3 +38,12 @@ Eksempel:
 
 
 ## Egenevaluering
+
+### Erfaringene med arbeidet og løsningen
+
+Vi startet faget med å splitte kohorten i 2 og 2. Vi tenkte det var bedre å jobbe med mindre grupper gjennom arbeidskravene. Etter siste arbeidskrav syntes vi det begynte å bli vanskeligere og tenkte at det er best med alle på kohorten sammen. Vi slo derfor sammen hele kohorten igjen for å fullføre eksamen sammen. Måten vi gjorde det på var at en programmerte mens alle så på Discord og kunne komme med innspill. 
+Det fungerte godt for gruppen og samles på discord for så og jobbe virituelt på en maskin. Dette gjorde at vi raskere kom fram til løsninger, og på den måten jobbet mer effektivt en om vi satt med hver vår oppgave til enhver tid. Det var for oss bedre at 4 hoder tenkte på det samme problemet en at man sitter med det helt alene og da fortsatt måtte ha spurt de andre i gruppen om hjelp. 
+
+### Hva har vi lært
+
+Før vi begynte undervisning i dette faget, kunne java til tider virke litt "skremmende". Vi ble raskt kastet på dypt vann, men det var hele tiden en reddningsbøyle i nærhetem for å forhinrde at vi "druknet". Etter dette semesteret er det fortsatt en smule fryktinngytende, men vi føler at vi nå bedre kan manipulere java-kode slik vi vil. En morsom teknikk vi har lært under fagetsløp er parrprogrammering. Dette har vi benyttet oss av i stor grad under hele perioden, da det ga oss gode resultater, raskere.  
