@@ -1,6 +1,7 @@
 package no.kristiania.dao;
 
 import no.kristiania.database.Member;
+import no.kristiania.database.ProjectTask;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -24,6 +25,20 @@ public class MemberDao extends AbstractDao<Member> {
 
     public List<Member> list() throws SQLException {
         return list("SELECT * FROM members");
+    }
+
+    public List<Member> list(Integer id) throws SQLException {
+        return list(id, "SELECT * FROM members WHERE id IN (SELECT member_id FROM members_to_tasks WHERE task_id = ?)");
+    }
+
+    public void updateEntityName(Member member) throws SQLException {
+        updateEntityName(member, "UPDATE members SET member_name = ? WHERE id = ?");
+    }
+
+    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, Member entity) throws SQLException{
+        statement.setString(1, entity.getName());
+        statement.setInt(2, entity.getId());
+        statement.executeUpdate();
     }
 
     protected void mapEntityToPreparedStatement(PreparedStatement statement, Member entity) throws SQLException{

@@ -1,7 +1,12 @@
 package no.kristiania.controllers;
 
-import no.kristiania.database.ProjectTask;
+import no.kristiania.dao.MemberDao;
+import no.kristiania.dao.MemberToTaskDao;
 import no.kristiania.dao.ProjectTaskDao;
+import no.kristiania.dao.StatusDao;
+import no.kristiania.database.MemberToTask;
+import no.kristiania.database.ProjectTask;
+import no.kristiania.database.Status;
 import no.kristiania.http.HttpMessage;
 import no.kristiania.http.QueryString;
 
@@ -9,11 +14,12 @@ import java.io.IOException;
 import java.net.Socket;
 import java.sql.SQLException;
 
-public class UpdateTaskController implements HttpController {
-    private ProjectTaskDao projectTaskDao;
+public class RemoveController implements HttpController {
 
-    public UpdateTaskController(ProjectTaskDao projectTaskDao) {
-        this.projectTaskDao = projectTaskDao;
+    private final MemberToTaskDao memberToTaskDao;
+
+    public RemoveController(MemberToTaskDao memberToTaskDao) {
+        this.memberToTaskDao = memberToTaskDao;
     }
 
     @Override
@@ -29,15 +35,16 @@ public class UpdateTaskController implements HttpController {
     }
 
     public HttpMessage handle(QueryString requestParameter) throws SQLException {
+        Integer memberId = Integer.valueOf(requestParameter.getParameter("memberId"));
         Integer taskId = Integer.valueOf(requestParameter.getParameter("taskId"));
-        Integer statusId = Integer.valueOf(requestParameter.getParameter("status"));
-        ProjectTask task = projectTaskDao.retrieve(taskId);
-        task.setStatusId(statusId);
+        MemberToTask memberToTask = new MemberToTask();
+        memberToTask.setMemberId(memberId);
+        memberToTask.setTaskId(taskId);
+        memberToTaskDao.delete(memberToTask);
 
-        projectTaskDao.update(task);
 
         HttpMessage redirect = new HttpMessage("HTTP/1.1 302 Redirect");
-        redirect.setHeader("Location", "http://localhost:8080/projectTasks.html");
+        redirect.setHeader("Location", "http://localhost:8080/index.html");
         return redirect;
     }
 }

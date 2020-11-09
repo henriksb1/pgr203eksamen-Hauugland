@@ -1,5 +1,6 @@
 package no.kristiania.dao;
 
+import no.kristiania.database.Member;
 import no.kristiania.database.Status;
 
 import javax.sql.DataSource;
@@ -14,12 +15,26 @@ public class StatusDao extends AbstractDao<Status>{
         super(dataSource);
     }
 
+    @Override
+    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, Status entity) throws SQLException {
+        statement.setString(1, entity.getName());
+        statement.setInt(2, entity.getId());
+        statement.executeUpdate();
+    }
+
+    public Status retrieve(Integer id) throws SQLException {
+        return retrieve(id, "SELECT * FROM statuses WHERE id = ?");
+    }
+
     public void insert(Status status) throws SQLException {
         insert(status, "INSERT INTO statuses (name) values (?)");
     }
 
     public List<Status> list() throws SQLException {
         return list("SELECT * FROM statuses");
+    }
+    public void updateEntityName(Status status) throws SQLException {
+        updateEntityName(status, "UPDATE statuses SET name = ? WHERE id = ?");
     }
 
     @Override
