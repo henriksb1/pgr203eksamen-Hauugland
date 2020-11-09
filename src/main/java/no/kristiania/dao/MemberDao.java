@@ -14,11 +14,6 @@ public class MemberDao extends AbstractDao<Member> {
 
     }
 
-    @Override
-    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, Member entity) throws SQLException {
-
-    }
-
     public void insert(Member member) throws SQLException {
         insert(member, "INSERT INTO members (member_name, email) values (?, ?)");
     }
@@ -37,7 +32,13 @@ public class MemberDao extends AbstractDao<Member> {
     }
 
     public void updateEntityName(Member member) throws SQLException {
-        updateEntityName(member, "UPDATE project_tasks SET task_name = ? WHERE id = ?");
+        updateEntityName(member, "UPDATE members SET member_name = ? WHERE id = ?");
+    }
+
+    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, Member entity) throws SQLException{
+        statement.setString(1, entity.getName());
+        statement.setInt(2, entity.getId());
+        statement.executeUpdate();
     }
 
     protected void mapEntityToPreparedStatement(PreparedStatement statement, Member entity) throws SQLException{

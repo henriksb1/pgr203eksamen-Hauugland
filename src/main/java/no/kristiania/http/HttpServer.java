@@ -40,18 +40,21 @@ public class HttpServer {
         projectTaskDao = new ProjectTaskDao(dataSource);
         memberToTaskDao = new MemberToTaskDao(dataSource);
         ProjectTaskDao projectTaskDao = new ProjectTaskDao(dataSource);
-        controllers = Map.of(
-                "/newProjectTasks", new ProjectTaskPostController(projectTaskDao),
-                "/projectTasks", new ProjectTaskGetController(projectTaskDao, memberDao, statusDao),
-                "/taskOptions", new ProjectTaskOptionsController(projectTaskDao),
-                "/memberOptions", new ProjectMemberOptionsController(memberDao),
-                "/addTaskToMember", new AddTaskToMemberController(memberToTaskDao),
-                "/status", new AddStatusController(statusDao),
-                "/statusOptions", new StatusOptionsController(statusDao),
-                "/updateTask", new UpdateTaskController(projectTaskDao),
-                "/removeTaskFromMember", new RemoveController(memberToTaskDao),
-                "/editTask", new UpdateTaskNameController(projectTaskDao)
+        controllers = Map.ofEntries(
+                Map.entry("/newProjectTasks", new ProjectTaskPostController(projectTaskDao)),
+                Map.entry("/projectTasks", new ProjectTaskGetController(projectTaskDao, memberDao, statusDao)),
+                Map.entry("/taskOptions", new ProjectTaskOptionsController(projectTaskDao)),
+                Map.entry("/memberOptions", new ProjectMemberOptionsController(memberDao)),
+                Map.entry("/addTaskToMember", new AddTaskToMemberController(memberToTaskDao)),
+                Map.entry("/status", new AddStatusController(statusDao)),
+                Map.entry("/statusOptions", new StatusOptionsController(statusDao)),
+                Map.entry("/updateTask", new UpdateTaskController(projectTaskDao)),
+                Map.entry("/removeTaskFromMember", new RemoveController(memberToTaskDao)),
+                Map.entry("/editTask", new UpdateTaskNameController(projectTaskDao)),
+                Map.entry("/editMember", new UpdateMemberNameController(memberDao)),
+                Map.entry("/editStatus", new UpdateStatusNameController(statusDao))
         );
+
 
         serverSocket = new ServerSocket(port);
 
