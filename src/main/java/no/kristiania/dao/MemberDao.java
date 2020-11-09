@@ -14,6 +14,11 @@ public class MemberDao extends AbstractDao<Member> {
 
     }
 
+    @Override
+    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, Member entity) throws SQLException {
+
+    }
+
     public void insert(Member member) throws SQLException {
         insert(member, "INSERT INTO members (member_name, email) values (?, ?)");
     }
@@ -29,6 +34,10 @@ public class MemberDao extends AbstractDao<Member> {
 
     public List<Member> list(Integer id) throws SQLException {
         return list(id, "SELECT * FROM members WHERE id IN (SELECT member_id FROM members_to_tasks WHERE task_id = ?)");
+    }
+
+    public void updateEntityName(Member member) throws SQLException {
+        updateEntityName(member, "UPDATE project_tasks SET task_name = ? WHERE id = ?");
     }
 
     protected void mapEntityToPreparedStatement(PreparedStatement statement, Member entity) throws SQLException{

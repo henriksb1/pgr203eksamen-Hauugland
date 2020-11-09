@@ -19,11 +19,12 @@ Eksempel:
 ```
 
 ## Designet på løsningen
+![](UMLDiagram.png)
 
 ## Ekstra leveranse utover minimumskravene
 - [x] Håndtering av request target "/"
 - [x] Avansert datamodell (mer enn 3 tabeller)
-- [ ] Avansert funksjonalitet (redigering av prosjektmedlemmer, statuskategorier, prosjekter)
+- [x] Avansert funksjonalitet (redigering av prosjektmedlemmer, statuskategorier, prosjekter)
 - [ ] Implementasjon av cookies for å konstruere sesjoner
 - [ ] UML diagram som dokumenterer datamodell og/eller arkitektur (presentert i README.md)
 - [x] Rammeverk rundt Http-håndtering (en god HttpMessage class med HttpRequest og HttpResponse subtyper) som gjenspeiler RFC7230

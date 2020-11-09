@@ -15,6 +15,12 @@ public class MemberToTaskDao extends AbstractDao<MemberToTask> {
         super(dataSource);
     }
 
+
+    @Override
+    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, MemberToTask entity) throws SQLException {
+
+    }
+
     public void insert(MemberToTask memberToTask) throws SQLException {
         insert(memberToTask, "INSERT INTO members_to_tasks (member_id, task_id) values (?, ?)");
     }
@@ -27,10 +33,10 @@ public class MemberToTaskDao extends AbstractDao<MemberToTask> {
         return list("SELECT * FROM members_to_tasks");
     }
 
-    public List<MemberToTask> listByMember(Integer id) throws SQLException {
-        return list("SELECT * FROM members_to_tasks");
-    }
 
+    public void delete(MemberToTask memberToTask) throws SQLException {
+        delete(memberToTask, "DELETE FROM members_to_tasks WHERE member_id = ? AND task_id = ?");
+    }
     @Override
     protected void mapEntityToPreparedStatement(PreparedStatement statement, MemberToTask entity) throws SQLException {
         statement.setInt(1, entity.getMemberId());

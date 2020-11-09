@@ -48,7 +48,9 @@ public class HttpServer {
                 "/addTaskToMember", new AddTaskToMemberController(memberToTaskDao),
                 "/status", new AddStatusController(statusDao),
                 "/statusOptions", new StatusOptionsController(statusDao),
-                "/updateTask", new UpdateTaskController(projectTaskDao)
+                "/updateTask", new UpdateTaskController(projectTaskDao),
+                "/removeTaskFromMember", new RemoveController(memberToTaskDao),
+                "/editTask", new UpdateTaskNameController(projectTaskDao)
         );
 
         serverSocket = new ServerSocket(port);

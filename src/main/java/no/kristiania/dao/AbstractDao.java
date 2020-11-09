@@ -1,6 +1,8 @@
 package no.kristiania.dao;
 
 import no.kristiania.database.IdEntity;
+import no.kristiania.database.MemberToTask;
+import no.kristiania.database.ProjectTask;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -59,6 +61,16 @@ public abstract class AbstractDao<T extends IdEntity> {
         return list;
     }
 
+    public void delete(T entity, String sql) throws SQLException {
+        try (Connection connection = dataSource.getConnection()){
+            try(PreparedStatement statement = connection.prepareStatement(
+                    sql
+            )){
+                mapEntityToPreparedStatement(statement, entity);
+            }
+        }
+    }
+
     public void insert(T entity, String sql) throws SQLException {
         try (Connection connection = dataSource.getConnection()){
             try(PreparedStatement statement = connection.prepareStatement(
@@ -72,6 +84,19 @@ public abstract class AbstractDao<T extends IdEntity> {
         }
     }
 
+    public void updateEntityName(T entity, String sql) throws SQLException {
+        try (Connection connection = dataSource.getConnection()){
+            try(PreparedStatement statement = connection.prepareStatement(
+                    sql
+
+            )){
+                mapEntityToPreparedStatementUpdateName(statement, entity);
+
+            }
+        }
+    }
+
+    protected abstract void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, T entity) throws SQLException;
 
 
     protected abstract void mapEntityToPreparedStatement(PreparedStatement statement, T entity) throws SQLException;
@@ -84,5 +109,6 @@ public abstract class AbstractDao<T extends IdEntity> {
     }
 
     protected abstract T mapRow(ResultSet rs) throws SQLException;
+
 
 }

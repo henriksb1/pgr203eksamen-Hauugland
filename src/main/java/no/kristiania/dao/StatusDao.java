@@ -14,6 +14,11 @@ public class StatusDao extends AbstractDao<Status>{
         super(dataSource);
     }
 
+    @Override
+    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, Status entity) throws SQLException {
+
+    }
+
     public void insert(Status status) throws SQLException {
         insert(status, "INSERT INTO statuses (name) values (?)");
     }

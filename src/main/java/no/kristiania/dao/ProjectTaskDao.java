@@ -27,6 +27,16 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
         return list(id, "SELECT * FROM project_tasks WHERE id IN (SELECT task_id FROM members_to_tasks WHERE member_id = ?)");
     }
 
+    public void updateEntityName(ProjectTask task) throws SQLException {
+        updateEntityName(task, "UPDATE project_tasks SET task_name = ? WHERE id = ?");
+    }
+
+    protected void mapEntityToPreparedStatementUpdateName(PreparedStatement statement, ProjectTask entity) throws SQLException{
+        statement.setString(1, entity.getName());
+        statement.setInt(2, entity.getId());
+        statement.executeUpdate();
+    }
+
     protected void mapEntityToPreparedStatement(PreparedStatement statement, ProjectTask entity) throws SQLException{
         statement.setString(1, entity.getName());
         statement.setInt(2, entity.getStatusId());
@@ -41,6 +51,7 @@ public class ProjectTaskDao extends AbstractDao<ProjectTask>{
         projectTask.setStatusId(rs.getInt("statusId"));
         return projectTask;
     }
+
 
     public void update(ProjectTask projectTask) throws SQLException {
         try (Connection connection = dataSource.getConnection()){
