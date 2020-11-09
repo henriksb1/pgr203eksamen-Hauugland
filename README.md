@@ -23,10 +23,10 @@ Dersom .jar kopieres over i annen mappe, skriver man "java -jar pgr203eksamen-Ha
 
 ## Datamodell og arkitektur
 
-### ER-diagram
+### ER-diagram (Datamodell)
 ![](docs/datamodel.png)
 
-### UML-diagram
+### UML-diagram (Arkitektur)
 ![](docs/architecture.png)
 
 
@@ -43,7 +43,9 @@ Dersom .jar kopieres over i annen mappe, skriver man "java -jar pgr203eksamen-Ha
 - [x] Link til video med god demonstrasjon av ping-pong programmering
 - [x] Automatisk rapportering av testdekning i Github Actions
 - [ ] Implementasjon av Chunked Transfer Encoding
-- [x] Annet
+- [x] Annet (Kan legge til flere oppgaver per medlem, man kan filtrere på status og oppgaver, man kan 
+fjerne enkeltoppgaver fra medlemmer, man kan endre status på oppgaver, bruk av "stream().map" og ".collect(Collectors.joining())
+ved printing av options i select bokser, plussmer)
 
 ## Egenevaluering
 
