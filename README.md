@@ -20,8 +20,10 @@ bygge prosjektet og opprette .jar
 ```
 
 
-## Designet på løsningen
-![]()
+## Datamodell og arkitektur
+![](docs/datamodel.png)
+![](docs/architecture.png)
+
 
 ## Ekstra leveranse utover minimumskravene
 - [x] Håndtering av request target "/"
