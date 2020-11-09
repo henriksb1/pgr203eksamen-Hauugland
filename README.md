@@ -1,22 +1,24 @@
 ![Java CI with Maven](https://github.com/kristiania/pgr203eksamen-Hauugland/workflows/Java%20CI%20with%20Maven/badge.svg)
 
-## Bygge, konfigurere og kjøre løsningen
+## Funksjonalitet, bygge og kjøre
 
-1) Kjør Maven -> Lifecycle -> clean for å fjerne /target. Kjør package deretter for å
-bygge prosjektet og opprette .jar fil som kan kjøres 
-2) Det må lages en konfigurasjonsfil som heter pgr203.properties, som må inneholde følgende:
+### Funksjonalitet
+Prosjektet er et prosjekt styringsverkøy for å holde styr på medlemmer, oppgaver og statuser. 
+I tilleg til å opprette, kan koble dem til hverandre og filtrere (f.eks statuser, for å se 
+alle oppgaver innen den statusen)
+
+### Bygge og kjøre
+1) Kjør Maven > Lifecycle > clean for å fjerne /target. Kjør deretter package for å
+bygge prosjektet og opprette .jar
+2) Det må lages en konfigurasjonsfil som heter pgr203.properties, som må inneholder koden under
+3) Kjør .jar med "java -jar target/pgr203eksamen-Hauugland-1.0-SNAPSHOT.jar" i terminalen
+
 ``` properties
     dataSource.url=...
     dataSource.username=...
     dataSource.password=...
 ```
 
-Eksempel:
-``` properties
-    dataSource.url=jdbc:postgresql://localhost:5432/eksamen
-    dataSource.username=eksamen
-    dataSource.password=e761@dasu72-234ksja
-```
 
 ## Designet på løsningen
 ![]()
