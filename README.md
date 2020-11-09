@@ -72,3 +72,6 @@ Vi har lært mye om hvor viktig det er å kode, feile, feilsøke og der av finne
 Man må ikke alltid ha svaret i hodet, men heller prøve seg fram.
 Vi sitter igjen med en god forståelse av Maven og har ikke hatt kronisk vondt i "maven", kun til tider. 
 Vi fått god kunnskap med testdekkning av programmet, vi har forstått verdien av og kjøre tester parallelt med kodingen for å verifisere koden.   
+
+## Video av parprogrammering
+https://youtu.be/ejZMhAd5BwY
