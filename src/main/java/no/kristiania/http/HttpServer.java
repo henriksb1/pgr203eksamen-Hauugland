@@ -158,7 +158,7 @@ public class HttpServer {
     private void handleGetMembers(Socket clientSocket, String requestTarget) throws SQLException, IOException {
         StringBuilder body = new StringBuilder("<ul>");
         for(Member member : memberDao.list()){
-            body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") </li><ul>");
+            body.append("<li>").append(member.getName()).append(" (Email: ").append(member.getEmail()).append(") <i>Working on task:</i></li><ul>");
             for(ProjectTask projectTask : projectTaskDao.list(member.getId())){
                 body.append("<li>" + projectTask.getName() + "</li>");
             }

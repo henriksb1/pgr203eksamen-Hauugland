@@ -17,6 +17,13 @@
 </form>
 <div id="filterTasks"></div>
 
+<h2>Add task to member:</h2>
+<form method="post" action="/addTaskToMember">
+    <p>Member: <select name="memberId" id="memberId"></select> </p>
+    <p>New Task: <select name="taskId" id="addTaskId"></select> </p>
+    <input type="submit" value="Submit">
+</form>
+
 <h2>Change status on task: </h2>
 <form action="/updateTask" method="post">
     <label>Tasks: </label>
@@ -56,6 +63,18 @@
             return response.text();
         }).then(function(text) {
         document.getElementById("filterTasks").innerHTML = text;
+    });
+    fetch("/memberOptions")
+        .then(function(response) {
+            return response.text();
+        }).then(function(text) {
+        document.getElementById("memberId").innerHTML = text;
+    });
+    fetch("/taskOptions")
+        .then(function(response) {
+            return response.text();
+        }).then(function(text) {
+        document.getElementById("addTaskId").innerHTML = text;
     });
 </script>
 </html>
