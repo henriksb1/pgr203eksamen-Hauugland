@@ -11,7 +11,8 @@ alle oppgaver innen den statusen)
 1) Kjør Maven > Lifecycle > clean for å fjerne /target. Kjør deretter package for å
 bygge prosjektet og opprette .jar
 2) Det må lages en konfigurasjonsfil som heter pgr203.properties, som må inneholder koden under
-3) Kjør .jar med "java -jar target/pgr203eksamen-Hauugland-1.0-SNAPSHOT.jar" i terminalen
+3) Kjør .jar med "java -jar target/pgr203eksamen-Hauugland-1.0-SNAPSHOT.jar" i terminalen. 
+Dersom .jar kopieres over i annen mappe, skriver man "java -jar pgr203eksamen-Hauugland-1.0-SNAPSHOT.jar"
 
 ``` properties
     dataSource.url=...
